@@ -149,7 +149,7 @@ messageCount = 0
 def tone_gpt3(zice):
     toneLabel = openai.Completion.create(
         engine="text-davinci-003",
-        prompt="Read the following interaction, then pick just one of the emotions for "+bot+" to respond to "+patient+" with from this list only: [friendly, empathetic, excited, hopeful, sad].\n"+bot+": "+raspuns+"\n"+patient+": "+zice+"\n\nEmotion: [",
+        prompt="Read the following interaction, then pick just one of the emotions for "+bot+" to respond to "+patient+" with from this list only: [friendly, empathetic, excited, sad].\n"+bot+": "+raspuns+"\n"+patient+": "+zice+"\n\nEmotion: [",
         temperature=0.0,
         max_tokens=12,
         top_p=1.0,
@@ -192,13 +192,13 @@ def chat_gpt3(zice):
     response = openai.Completion.create(
         engine="text-davinci-003",
         prompt= "You are, "+bot+", a virtual bedside assistant at Temple University Hospital for a patient named "+patient+". You are comforting, assuring, empathetic, and kind. Read the patient's chart below and answer any questions that may arise. If nurse intervention is required, kindly instruct the patient to press their nurse call button.\n\n"+chart+context+"\n"+patient+": "+zice+"\n"+bot+" ["+style+"]:",
-        temperature=1.0,
-        max_tokens=256,
+        temperature=0.7,
+        max_tokens=128,
         top_p=1.0,
         frequency_penalty=0.0,
         presence_penalty=0.0,
         stop=[patient+":", bot+":", "["],
-        echo=True,
+        echo=False,
     )
     return response
 
@@ -271,7 +271,7 @@ while (True):
                 xmlns:mstts="https://www.w3.org/2001/mstts" xml:lang="en-US">
                 <voice name="'''+voice+'''">
                 <prosody rate="medium">
-                <mstts:express-as style="'''+style+'''" styledegree="2">
+                <mstts:express-as style="'''+style+'''" styledegree="1">
                 '''+ raspuns +'''
                 </mstts:express-as>
                 </prosody>
@@ -329,7 +329,7 @@ while (True):
                     xmlns:mstts="https://www.w3.org/2001/mstts" xml:lang="en-US">
                     <voice name="'''+voice+'''">
                     <prosody rate="medium">
-                    <mstts:express-as style="'''+style+'''" styledegree="2">
+                    <mstts:express-as style="'''+style+'''" styledegree="1">
                     '''+ raspuns +'''
                     </mstts:express-as>
                     </prosody>
