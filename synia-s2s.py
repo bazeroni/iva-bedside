@@ -143,13 +143,13 @@ messageCount = 0
 
 """ TONE_GPT3()
 1. inputs and reads patient prompt
-3. chooses emotional response from given list of styles
+3. chooses emotional response from given list of styles: friendly, empathetic, cheerful, excited, hopeful, sad
 2. returns style/emotion
 """
 def tone_gpt3(zice):
     toneLabel = openai.Completion.create(
         engine="text-davinci-003",
-        prompt="Read the following interaction, then pick just one of the emotions for "+bot+" to respond to "+patient+" with from this list only: [friendly, empathetic, excited, sad].\n"+bot+": "+raspuns+"\n"+patient+": "+zice+"\n\nEmotion: [",
+        prompt="Read the following interaction, then pick just one of the emotions for "+bot+" to respond to "+patient+" with from this list only: [friendly, empathetic, cheerful, excited, hopeful, sad].\n"+bot+": "+raspuns+"\n"+patient+": "+zice+"\n\nEmotion: [",
         temperature=0.0,
         max_tokens=12,
         top_p=1.0,
@@ -191,7 +191,7 @@ def concatContext():
 def chat_gpt3(zice):
     response = openai.Completion.create(
         engine="text-davinci-003",
-        prompt= "You are, "+bot+", a virtual bedside assistant at Temple University Hospital for a patient named "+patient+". You are comforting, assuring, empathetic, and kind. Read the patient's chart below and answer any questions that may arise. If nurse intervention is required, kindly instruct the patient to press their nurse call button.\n\n"+chart+context+"\n"+patient+": "+zice+"\n"+bot+" ["+style+"]:",
+        prompt= "You are, "+bot+", a virtual bedside assistant at Temple University Hospital for a patient named "+patient+". If nurse intervention is required, kindly instruct the patient to press their nurse call button. Read the patient's chart below and answer any questions that may arise. You are comforting, assuring, empathetic, and kind. Do not bombard or overwhelm the patient with lots of information.\n\n"+chart+context+"\n"+patient+": "+zice+"\n"+bot+" ["+style+"]:",
         temperature=0.7,
         max_tokens=128,
         top_p=1.0,
@@ -271,7 +271,7 @@ while (True):
                 xmlns:mstts="https://www.w3.org/2001/mstts" xml:lang="en-US">
                 <voice name="'''+voice+'''">
                 <prosody rate="medium">
-                <mstts:express-as style="'''+style+'''" styledegree="1">
+                <mstts:express-as style="'''+style+'''" styledegree="0.5">
                 '''+ raspuns +'''
                 </mstts:express-as>
                 </prosody>
@@ -329,7 +329,7 @@ while (True):
                     xmlns:mstts="https://www.w3.org/2001/mstts" xml:lang="en-US">
                     <voice name="'''+voice+'''">
                     <prosody rate="medium">
-                    <mstts:express-as style="'''+style+'''" styledegree="1">
+                    <mstts:express-as style="'''+style+'''" styledegree="0.5">
                     '''+ raspuns +'''
                     </mstts:express-as>
                     </prosody>
