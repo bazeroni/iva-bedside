@@ -1,8 +1,4 @@
-#import random
 import keyboard
-#import whisper
-#import io
-#import time
 import os
 import openai
 from dotenv import load_dotenv
