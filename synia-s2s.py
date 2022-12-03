@@ -124,11 +124,10 @@ dailyMessage = "-\"Hey this is RN Jane. Great job today! See you tomorrow\""
 chart = f"----------------MEDICAL CHART-------------------\n\nPatient: {patient}\nDate of Birth: {dob}\nAge: {age}\nWeight: {weight}\nHeight: {height}\n\nCurrent Date: {dateCurrent}\nCurrent Time: {timeCurrent}\nZone: {zone}\nFloor: {floor}\nRoom: {roomNumber}\nRoom Temperature: {roomTemperature}\nDate Admitted: {dateAdmitted}\nExpected Discharge Date: {dateDischarge}\n\nALLERGIES\n{allergies}\n\nMEDICATIONS\n{medications}\n\nREASON FOR ADMISSION\n{reasonForAdmission}\n\nASSESSMENT\n{assessment}\n\nTREATMENT PLAN\n{treatmentPlan}\n\nFOLLOW-UP\n{followUp}\n\nDISCHARGE PLAN\n{dischargePlan}\n\nCONDITIONS AND PRECAUTIONS\nLast Pain Med Request: {lastPainMedRequest}\nMobility Restriction: {restrictMobility}\nFluid Restriction: {restrictFluid}\nDiet Restriction: {restrictDiet}\nFall Risk: {fallRisk}\nIsolation: {isolation}\n\nVITALS\nBP: {bloodPressure}\nHR: {pulse}\nRR: {respiratoryRate}\nTemp: {temperature}\nO2: {oxygenSaturation}\n\nCARE TEAM\nAttending Provider: {attendingProvider}\nPulmonologist: {pulmonologist}\nRespiratory Therapist: {respiratoryTherapist}\nPhysical Therapist: {physicalTherapist}\nNurse Practitioner: {nursePractitioner}\nRegistered Nurse: {registeredNurse}\nNurse Assistant: {nurseAssistant}\n\nGOALS / PLAN FOR THE DAY\n{goals}\n\nUPCOMING EVENTS\n{events}\n\nUPCOMING CONSULTS\n{consults}\n\nPREVIOUS SHIFT MESSAGES TO PATIENT\n{dailyMessage}\n\n----------------START OF CHAT-------------------\n"
 
 ### SETUP VARIABLES ###
-# concats message history for re-insertion with every prompt
+# concatenates message history for re-insertion with every prompt
 context = ""
+# stores separate messages in list to be concatenated
 messages = []
-# last response from GPT
-raspuns = ""
 # counts number of times patient silence for input
 silenceCount = 0
 
@@ -147,7 +146,7 @@ def concatenate_context():
     global messages
     global context
     
-    if len(messages) == 6:
+    if len(messages) == 9:
         messages.pop()
         
     #print(len(messages))
@@ -181,10 +180,9 @@ def tts(ssml):
     #speech_synthesis_result = speech_synthesizer.speak_ssml_async(ssml)
     speech_synthesis_result = speech_synthesizer.speak_ssml_async(ssml).get()
 
-def respond(prompt):
+def respond(prompt, raspuns):
     
     global messages
-    global raspuns
     global silenceCount
     
     # formats raspuns
@@ -216,15 +214,11 @@ def respond(prompt):
     # resets silence count to 0
     silenceCount = 0
 
-    # marks interaction
-    done = True
-
 # given input stt
 # generates style and response from GPT-3
 # synthesizes response tts
 def think(inp):
     
-    global raspuns
     global silenceCount
     
     # checks if there is verbal input
@@ -237,7 +231,7 @@ def think(inp):
         # gets GPT text message response completion
         raspuns = (chat_gpt3(inp)).choices[0].text
         
-        respond(prompt)
+        respond(prompt, raspuns)
         
         return
     
@@ -252,7 +246,7 @@ def think(inp):
         # gets GPT text message response completion
         raspuns = (chat_gpt3("...")).choices[0].text
         
-        respond(prompt)
+        respond(prompt, raspuns)
             
     # increases silence count
     silenceCount += 1
@@ -275,7 +269,7 @@ def listen():
         speech_recognizer.recognized.connect(think(speech_recognition_result.text))
 
         #message = input(patient + ": ")
-        #textSpeech(message)
+        #think(message)
 
 def wait_for_key(key):
     
