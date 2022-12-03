@@ -1,5 +1,6 @@
 import keyboard
 import os
+import time
 import openai
 from dotenv import load_dotenv
 import azure.cognitiveservices.speech as speechsdk
@@ -63,7 +64,7 @@ dateCurrent = "11-30-22"
 timeCurrent = "12:23 AM"
 zone = "Tioga Pavilion (Zone A)"
 floor = "3 West"
-roomNumber = "A315"
+roomNumber = "A-315"
 roomTemperature = "73.4 F (Only patient/nurse adjustable through TV remote )"
 dateAdmitted = "11-22-22"
 dateDischarge = "12-10-22"
@@ -76,10 +77,11 @@ respiratoryRate = "16 breaths/min"
 oxygenSaturation = "96%"
 
 ## conditions and precautions
-lastPainMedRequest = "11-29-22 07:15 AM"
-restrictMobility = "Yes, Bed Rest"
-restrictFluid = "Yes, please see nurse"
-restrictDiet = "Yes, Nothing by mouth after midnight (NPO)"
+lastPainMed = "11-29-22 07:15 AM"
+nextPainMed = "11-30-22 07:15 AM"
+restrictMobility = "Yes, bed rest"
+restrictFluid = "Yes, fluid restriction, please see nurse"
+restrictDiet = "Yes, nothing by mouth after midnight (NPO)"
 fallRisk = "Yes, call for assistance"
 isolation = "Yes, visitors must follow isolation instructions"
 
@@ -121,7 +123,7 @@ dailyMessage = "-\"Hey this is RN Jane. Great job today! See you tomorrow\""
 
 ## Compiled Chart ##
 
-chart = f"----------------MEDICAL CHART-------------------\n\nPatient: {patient}\nDate of Birth: {dob}\nAge: {age}\nWeight: {weight}\nHeight: {height}\n\nCurrent Date: {dateCurrent}\nCurrent Time: {timeCurrent}\nZone: {zone}\nFloor: {floor}\nRoom: {roomNumber}\nRoom Temperature: {roomTemperature}\nDate Admitted: {dateAdmitted}\nExpected Discharge Date: {dateDischarge}\n\nALLERGIES\n{allergies}\n\nMEDICATIONS\n{medications}\n\nREASON FOR ADMISSION\n{reasonForAdmission}\n\nASSESSMENT\n{assessment}\n\nTREATMENT PLAN\n{treatmentPlan}\n\nFOLLOW-UP\n{followUp}\n\nDISCHARGE PLAN\n{dischargePlan}\n\nCONDITIONS AND PRECAUTIONS\nLast Pain Med Request: {lastPainMedRequest}\nMobility Restriction: {restrictMobility}\nFluid Restriction: {restrictFluid}\nDiet Restriction: {restrictDiet}\nFall Risk: {fallRisk}\nIsolation: {isolation}\n\nVITALS\nBP: {bloodPressure}\nHR: {pulse}\nRR: {respiratoryRate}\nTemp: {temperature}\nO2: {oxygenSaturation}\n\nCARE TEAM\nAttending Provider: {attendingProvider}\nPulmonologist: {pulmonologist}\nRespiratory Therapist: {respiratoryTherapist}\nPhysical Therapist: {physicalTherapist}\nNurse Practitioner: {nursePractitioner}\nRegistered Nurse: {registeredNurse}\nNurse Assistant: {nurseAssistant}\n\nGOALS / PLAN FOR THE DAY\n{goals}\n\nUPCOMING EVENTS\n{events}\n\nUPCOMING CONSULTS\n{consults}\n\nPREVIOUS SHIFT MESSAGES TO PATIENT\n{dailyMessage}\n\n----------------START OF CHAT-------------------\n"
+chart = f"----------------MEDICAL CHART-------------------\n\nPatient: {patient}\nDate of Birth: {dob}\nAge: {age}\nWeight: {weight}\nHeight: {height}\n\nCurrent Date: {dateCurrent}\nCurrent Time: {timeCurrent}\nZone: {zone}\nFloor: {floor}\nRoom: {roomNumber}\nRoom Temperature: {roomTemperature}\nDate Admitted: {dateAdmitted}\nExpected Discharge Date: {dateDischarge}\n\nALLERGIES\n{allergies}\n\nMEDICATIONS\n{medications}\n\nREASON FOR ADMISSION\n{reasonForAdmission}\n\nASSESSMENT\n{assessment}\n\nTREATMENT PLAN\n{treatmentPlan}\n\nFOLLOW-UP\n{followUp}\n\nDISCHARGE PLAN\n{dischargePlan}\n\nCONDITIONS AND PRECAUTIONS\nLast Pain Medication: {lastPainMed}\nNext Pain Medication: {nextPainMed}\nMobility Restriction: {restrictMobility}\nFluid Restriction: {restrictFluid}\nDiet Restriction: {restrictDiet}\nFall Risk: {fallRisk}\nIsolation: {isolation}\n\nVITALS\nBP: {bloodPressure}\nHR: {pulse}\nRR: {respiratoryRate}\nTemp: {temperature}\nO2: {oxygenSaturation}\n\nCARE TEAM\nAttending Provider: {attendingProvider}\nPulmonologist: {pulmonologist}\nRespiratory Therapist: {respiratoryTherapist}\nPhysical Therapist: {physicalTherapist}\nNurse Practitioner: {nursePractitioner}\nRegistered Nurse: {registeredNurse}\nNurse Assistant: {nurseAssistant}\n\nGOALS / PLAN FOR THE DAY\n{goals}\n\nUPCOMING EVENTS\n{events}\n\nUPCOMING CONSULTS\n{consults}\n\nPREVIOUS SHIFT MESSAGES TO PATIENT\n{dailyMessage}\n\n----------------START OF CHAT-------------------\n"
 
 ### SETUP VARIABLES ###
 # concatenates message history for re-insertion with every prompt
@@ -146,7 +148,7 @@ def concatenate_context():
     global messages
     global context
     
-    if len(messages) == 6:
+    if len(messages) == 2:
         messages.pop()
         
     #print(len(messages))
@@ -158,17 +160,19 @@ def concatenate_context():
 # responds with given style from TONE_GPT3()
 # returns response
 def chat_gpt3(zice):
+    start_time = time.time()
     response = openai.Completion.create(
         engine="text-davinci-003",
-        prompt= "You are, "+bot+", a clinical bedside virtual intelligent assistant (VIA) at Trinity University Hospital for a patient named "+patient+". Kindly instruct the patient to press their nurse call button on the TV  remote when needed.\n\n"+chart+context+"\n"+patient+": "+zice+"\n"+bot+":",
-        temperature=1.0,
+        prompt= "You are, "+bot+", a clinical bedside virtual intelligent assistant (VIA) at Trinity University Hospital for a patient named "+patient+". Kindly instruct the patient to press their nurse call button on their TV remote when needed.\n\n"+chart+context+"\n"+patient+": "+zice+"\n"+bot+":",
+        temperature=0.7,
         max_tokens=256,
         top_p=1.0,
-        frequency_penalty=0.0,
-        presence_penalty=0.0,
+        frequency_penalty=2.0,
+        presence_penalty=2.0,
         stop=[patient+":", bot+":"],
         echo=False,
     )
+    responseTime = time.time() - start_time
     return response
 
 # inputs response SSML from CHAT_GPT()
@@ -180,18 +184,18 @@ def tts(ssml):
     #speech_synthesis_result = speech_synthesizer.speak_ssml_async(ssml)
     speech_synthesis_result = speech_synthesizer.speak_ssml_async(ssml).get()
 
-def respond(prompt, raspuns):
+def respond(prompt, response):
     
     global messages
     global silenceCount
     
-    # formats raspuns
-    raspunsF = bot+": " + raspuns
+    # formats response
+    responseFormatted = bot+": " + response
 
-    # prints raspuns
-    print(raspunsF)
+    # prints response
+    print(responseFormatted)
 
-    messages.append("\n"+prompt+"\n"+raspunsF)
+    messages.append("\n"+prompt+"\n"+responseFormatted)
 
     # concats message to memory/history
     concatenate_context()
@@ -202,7 +206,7 @@ def respond(prompt, raspuns):
     <voice name="'''+voice+'''">
     <prosody rate="medium">
     <mstts:express-as style="Friendly" styledegree="0.5">
-    '''+ raspuns +'''
+    '''+ response +'''
     </mstts:express-as>
     </prosody>
     </voice>
@@ -229,9 +233,9 @@ def think(inp):
         print(prompt)
         
         # gets GPT text message response completion
-        raspuns = (chat_gpt3(inp)).choices[0].text
+        response = (chat_gpt3(inp)).choices[0].text
         
-        respond(prompt, raspuns)
+        respond(prompt, response)
         
         return
     
@@ -244,9 +248,9 @@ def think(inp):
         print(prompt)
         
         # gets GPT text message response completion
-        raspuns = (chat_gpt3("...")).choices[0].text
+        response = (chat_gpt3("...")).choices[0].text
         
-        respond(prompt, raspuns)
+        respond(prompt, response)
             
     # increases silence count
     silenceCount += 1
