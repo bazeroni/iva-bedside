@@ -141,11 +141,9 @@ silenceCount = 0
 # counts number of messages in conversation history 
 messageCount = 0
 
-""" TONE_GPT3()
-1. inputs and reads patient prompt
-3. chooses emotional response from given list of styles: friendly, empathetic, cheerful, excited, hopeful, sad
-2. returns style/emotion
-"""
+# inputs and reads patient prompt
+# chooses emotional response from given list of styles: friendly, empathetic, cheerful, excited, hopeful, sad
+# returns style/emotion
 def tone_gpt3(zice):
     toneLabel = openai.Completion.create(
         engine="text-davinci-003",
@@ -168,9 +166,9 @@ def on_key_press(key):
 
     input = input(patient + ": ")
 
-    textSpeech(input)
+    text_speech(input)
 
-def concatContext():
+def concatenate_context():
     
     global messages
     global context
@@ -183,11 +181,9 @@ def concatContext():
     for message in messages:
         context += message
 
-""" CHAT_GPT3()
-1. inputs and reads patient prompt
-2. responds with given style from TONE_GPT3()
-3. returns response
-"""
+# inputs and reads patient prompt
+# responds with given style from TONE_GPT3()
+# returns response
 def chat_gpt3(zice):
     response = openai.Completion.create(
         engine="text-davinci-003",
@@ -202,10 +198,8 @@ def chat_gpt3(zice):
     )
     return response
 
-""" TTS()
-1. inputs response SSML from CHAT_GPT()
-2. streams async synthesis
-"""
+# inputs response SSML from CHAT_GPT()
+# streams async synthesis
 def tts(ssml):
     global speech_synthesis_result
     #speech_synthesis_result = speech_synthesizer.speak_ssml_async(ssml)
@@ -214,7 +208,7 @@ def tts(ssml):
 # given input stt
 # generates style and response from GPT-3
 # synthesizes response tts
-def textSpeech(inp):
+def text_speech(inp):
     
     inp.encode("utf-8")
     
@@ -254,7 +248,7 @@ def textSpeech(inp):
         messages.append("\n"+prompt+"\n"+raspunsF)
 
         # concats message to memory/history
-        concatContext()
+        concatenate_context()
 
         # SSML for TTS with response and style
         xmlString = '''<speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis"
@@ -307,7 +301,7 @@ def textSpeech(inp):
             messages.append("\n"+prompt+"\n"+raspunsF)
 
             # concats message to memory/history
-            concatContext()
+            concatenate_context()
 
             # SSML for TTS with response and style
             xmlString = '''<speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis"
@@ -351,7 +345,7 @@ def listen():
         playsound('stop.mp3', False)
 
         # gets tts from azure stt
-        speech_recognizer.recognized.connect(textSpeech(speech_recognition_result.text))
+        speech_recognizer.recognized.connect(text_speech(speech_recognition_result.text))
 
         # Start listening for keystrokes
         #keyboard.on_press(on_key_press)
