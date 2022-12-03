@@ -52,7 +52,7 @@ speech_recognizer = speechsdk.SpeechRecognizer(speech_config=speech_config, audi
 speech_synthesizer = speechsdk.SpeechSynthesizer(speech_config=speech_config, audio_config=tts_config)
 
 # sets up identifiers for conversation
-bot = "VBA"
+bot = "VIA"
 patient = "Andrew Lopez"
 
 ### bedside variables ###
@@ -65,7 +65,7 @@ height = "180.3 cm"
 
 dateCurrent = "11-30-22"
 timeCurrent = "12:23 AM"
-zone = "Rock Pavilion (Zone A)"
+zone = "Tioga Pavilion (Zone A)"
 floor = "3 West"
 roomNumber = "A315"
 roomTemperature = "73.4 F (Only adjustable through TV remote or nurse)"
@@ -191,7 +191,7 @@ def concatContext():
 def chat_gpt3(zice):
     response = openai.Completion.create(
         engine="text-davinci-003",
-        prompt= "You are, "+bot+", a virtual bedside assistant at Temple University Hospital for a patient named "+patient+". Kindly instruct the patient to press their nurse call button when needed.\n\n"+chart+context+"\n"+patient+": "+zice+"\n"+bot+" ["+style+"]:",
+        prompt= "You are, "+bot+", a clinical bedside virtual intelligent assistant (VIA) at Trinity University Hospital for a patient named "+patient+". Kindly instruct the patient to press their nurse call button when needed.\n\n"+chart+context+"\n"+patient+": "+zice+"\n"+bot+" ["+style+"]:",
         temperature=1.0,
         max_tokens=512,
         top_p=1.0,
@@ -362,21 +362,25 @@ def listen():
         message = input(patient + ": ")
 
         textSpeech(message)
+        
     """
-    
 
-while (True):
+def wait_for_key(key):
+    
+    while True:  # making a loop
+        if keyboard.is_pressed(key):  # if key is pressed
+            break  # finishing the loop
+
+print("VIA-Bedside\n\nWait for the |||||||||| LISTENING |||||||||| command and sound cue before speaking.\n\nPress the space key to continue...")
+
+wait_for_key('space')
+
+while True:
 
     try:
         
         # controls whether interaction has been recieved and processed or not
         done = False
-        
-        print("\nPress the space key to continue...")
-        
-        while True:  # making a loop
-            if keyboard.is_pressed('space'):  # if key 'space' is pressed 
-                break  # finishing the loop
         
         listen()
 
