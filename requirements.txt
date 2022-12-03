@@ -1,11 +1,5 @@
 azure_storage==0.37.0
-matplotlib==3.6.1
-nltk==3.7
-numpy==1.23.3
+keyboard==0.13.5
 openai==0.23.1
 playsound==1.2.2
-pydub==0.25.1
 python-dotenv==0.21.0
-SpeechRecognition==3.8.1
-whisper==1.1.10
-xmltodict==0.13.0
