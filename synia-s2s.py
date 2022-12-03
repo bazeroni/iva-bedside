@@ -129,11 +129,8 @@ context = ""
 messages = []
 # last response from GPT
 raspuns = ""
-raspunsF = ""
 # counts number of times patient silence for input
 silenceCount = 0
-# counts number of messages in conversation history 
-messageCount = 0
 
 # Define a callback function that will be called
 # whenever a key is pressed
@@ -186,12 +183,9 @@ def tts(ssml):
 
 def respond(prompt):
     
-    global context
     global messages
     global raspuns
-    global raspunsF
     global silenceCount
-    global messageCount
     
     # formats raspuns
     raspunsF = bot+": " + raspuns
@@ -230,12 +224,8 @@ def respond(prompt):
 # synthesizes response tts
 def think(inp):
     
-    global context
-    global messages
     global raspuns
-    global raspunsF
     global silenceCount
-    global messageCount
     
     # checks if there is verbal input
     if inp != "":
