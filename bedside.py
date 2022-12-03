@@ -146,7 +146,7 @@ def concatenate_context():
     global messages
     global context
     
-    if len(messages) == 9:
+    if len(messages) == 6:
         messages.pop()
         
     #print(len(messages))
@@ -160,13 +160,13 @@ def concatenate_context():
 def chat_gpt3(zice):
     response = openai.Completion.create(
         engine="text-davinci-003",
-        prompt= "You are, "+bot+", a clinical bedside virtual intelligent assistant (VIA) at Trinity University Hospital for a patient named "+patient+". Kindly instruct the patient to press their nurse call button when needed.\n\n"+chart+context+"\n"+patient+": "+zice+"\n"+bot+":",
+        prompt= "You are, "+bot+", a clinical bedside virtual intelligent assistant (VIA) at Trinity University Hospital for a patient named "+patient+". Kindly instruct the patient to press their nurse call button on the TV  remote when needed.\n\n"+chart+context+"\n"+patient+": "+zice+"\n"+bot+":",
         temperature=1.0,
-        max_tokens=512,
+        max_tokens=256,
         top_p=1.0,
         frequency_penalty=0.0,
         presence_penalty=0.0,
-        stop=[patient+":", bot+":", "["],
+        stop=[patient+":", bot+":"],
         echo=False,
     )
     return response
