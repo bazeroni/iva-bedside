@@ -1,9 +1,11 @@
 import keyboard
 import os
+import sys
 import time
 import openai
-from dotenv import load_dotenv
+import asyncio
 import azure.cognitiveservices.speech as speechsdk
+from dotenv import load_dotenv
 from playsound import playsound
 
 # loads env variables file
@@ -160,6 +162,7 @@ def concatenate_context():
 # responds with given style from TONE_GPT3()
 # returns response
 def chat_gpt3(zice):
+    
     start_time = time.time()
     response = openai.Completion.create(
         engine="text-davinci-003",
@@ -171,9 +174,25 @@ def chat_gpt3(zice):
         presence_penalty=2.0,
         stop=[patient+":", bot+":"],
         echo=False,
+        stream=True,
     )
     responseTime = time.time() - start_time
-    return response
+    
+    # create variables to collect the stream of events
+    collected_events = []
+    completion_text = ""
+    print(f"{bot}:", end="")
+    
+    # iterate through the stream of events
+    for event in response:
+        event_time = time.time() - start_time  # calculate the time delay of the event
+        collected_events.append(event)  # save the event response
+        event_text = event['choices'][0]['text']  # extract the text
+        completion_text += event_text  # append the text
+        print(event_text, end="")  # print the delay and text
+        
+    print(f" [{responseTime:.2f} S]\n")
+    return completion_text
 
 # inputs response SSML from CHAT_GPT()
 # streams async synthesis
@@ -189,11 +208,7 @@ def respond(prompt, response):
     global messages
     global silenceCount
     
-    # formats response
-    responseFormatted = bot+": " + response
-
-    # prints response
-    print(responseFormatted)
+    responseFormatted = f"{bot}:" + response
 
     messages.append("\n"+prompt+"\n"+responseFormatted)
 
@@ -230,10 +245,10 @@ def think(inp):
         
         # parses and formats patient input
         prompt = patient+": "+inp
-        print(prompt)
+        print("\n\n"+prompt)
         
         # gets GPT text message response completion
-        response = (chat_gpt3(inp)).choices[0].text
+        response = chat_gpt3(inp)
         
         respond(prompt, response)
         
@@ -245,23 +260,33 @@ def think(inp):
         
         # imitates silent input
         prompt = patient+": ..."
-        print(prompt)
+        print("\n\n"+prompt)
         
         # gets GPT text message response completion
-        response = (chat_gpt3("...")).choices[0].text
+        response = chat_gpt3("...")
         
         respond(prompt, response)
             
     # increases silence count
     silenceCount += 1
+    
+def listening():
+    
+    listening = "||||||||||"
+    
+    for character in listening:
+        time.sleep(0.005)
+        print(character, end="")
+    
         
 def listen():
     
     # listens for speech
     while True:
-        
-        print("\n|||||||||| LISTENING ||||||||||\n")
+
         playsound('start.mp3', False)
+        
+        listening()
         
         # gets azure stt
         speech_recognition_result = speech_recognizer.recognize_once_async().get()
@@ -281,7 +306,7 @@ def wait_for_key(key):
         if keyboard.is_pressed(key):  # if key is pressed
             break  # finishing the loop
 
-print("VIA-Bedside\n\nWait for the |||||||||| LISTENING |||||||||| command and sound cue before speaking.\n\nPress the space key to continue...")
+print("\nVIA-Bedside\n\nWait for the |||||||||| command and sound cue before speaking.\n\nPress the space key to continue...\n")
 
 wait_for_key('space')
 
