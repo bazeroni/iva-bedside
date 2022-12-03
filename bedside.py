@@ -1,9 +1,7 @@
 import keyboard
 import os
-import sys
 import time
 import openai
-import asyncio
 import azure.cognitiveservices.speech as speechsdk
 from dotenv import load_dotenv
 from playsound import playsound
@@ -270,7 +268,7 @@ def think(inp):
     # increases silence count
     silenceCount += 1
     
-def listening():
+def listeningAnimation():
     
     listening = "||||||||||"
     
@@ -278,7 +276,14 @@ def listening():
         time.sleep(0.005)
         print(character, end="")
     
-        
+def recognize():
+    
+    # gets azure stt
+    speech_recognition_result = speech_recognizer.recognize_once_async().get()
+    #speech_recognizer.start_continuous_recognition_async()
+    
+    return speech_recognition_result
+    
 def listen():
     
     # listens for speech
@@ -286,12 +291,10 @@ def listen():
 
         playsound('start.mp3', False)
         
-        listening()
+        listeningAnimation()
         
-        # gets azure stt
-        speech_recognition_result = speech_recognizer.recognize_once_async().get()
-        #speech_recognizer.start_continuous_recognition_async()
-
+        speech_recognition_result = recognize()
+        
         playsound('stop.mp3', False)
 
         # gets tts from azure stt
