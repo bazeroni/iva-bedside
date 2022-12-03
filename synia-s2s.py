@@ -134,29 +134,10 @@ messages = []
 # last response from GPT
 raspuns = ""
 raspunsF = ""
-# holds emotional response chosen by GPT-3
-style = ""
 # counts number of times patient silence for input
 silenceCount = 0
 # counts number of messages in conversation history 
 messageCount = 0
-
-# inputs and reads patient prompt
-# chooses emotional response from given list of styles: friendly, empathetic, cheerful, excited, hopeful, sad
-# returns style/emotion
-def tone_gpt3(zice):
-    toneLabel = openai.Completion.create(
-        engine="text-davinci-003",
-        prompt="Read the following interaction, then pick just one of the emotions for "+bot+" to respond to "+patient+" with from this list only: [friendly, empathetic, cheerful, excited, hopeful, sad].\n"+bot+": "+raspuns+"\n"+patient+": "+zice+"\n\nEmotion: [",
-        temperature=0.0,
-        max_tokens=12,
-        top_p=1.0,
-        frequency_penalty=0.0,
-        presence_penalty=0.0,
-        stop=[patient+":", bot+":", "Emotion: [", ","],
-        echo=False,
-    )
-    return toneLabel
 
 # Define a callback function that will be called
 # whenever a key is pressed
@@ -187,7 +168,7 @@ def concatenate_context():
 def chat_gpt3(zice):
     response = openai.Completion.create(
         engine="text-davinci-003",
-        prompt= "You are, "+bot+", a clinical bedside virtual intelligent assistant (VIA) at Trinity University Hospital for a patient named "+patient+". Kindly instruct the patient to press their nurse call button when needed.\n\n"+chart+context+"\n"+patient+": "+zice+"\n"+bot+" ["+style+"]:",
+        prompt= "You are, "+bot+", a clinical bedside virtual intelligent assistant (VIA) at Trinity University Hospital for a patient named "+patient+". Kindly instruct the patient to press their nurse call button when needed.\n\n"+chart+context+"\n"+patient+": "+zice+"\n"+bot+":",
         temperature=1.0,
         max_tokens=512,
         top_p=1.0,
@@ -210,15 +191,12 @@ def tts(ssml):
 # synthesizes response tts
 def text_speech(inp):
     
-    inp.encode("utf-8")
-    
     # parses and formats patient input
     prompt = patient+": "+inp
 
     # global counter and helper variables
     global silenceCount
     global context
-    global style
     global raspuns
     global raspunsF
     global done
@@ -230,15 +208,11 @@ def text_speech(inp):
         #print("NON-SILENCE")
         print(prompt)
 
-        # gets style GPT would like to respond with
-        style = ((tone_gpt3(inp)).choices[0].text).split("]")[0]
-        #print(style)
-
         # gets GPT text message response completion
         raspuns = (chat_gpt3(inp)).choices[0].text
         
         # formats raspuns
-        raspunsF = bot+" ["+style+"]: " + raspuns
+        raspunsF = bot+": " + raspuns
         #raspunsF = bot+": "+raspuns
 
         # prints raspuns
@@ -255,7 +229,7 @@ def text_speech(inp):
         xmlns:mstts="https://www.w3.org/2001/mstts" xml:lang="en-US">
         <voice name="'''+voice+'''">
         <prosody rate="medium">
-        <mstts:express-as style="'''+style+'''" styledegree="0.5">
+        <mstts:express-as style="Friendly" styledegree="0.5">
         '''+ raspuns +'''
         </mstts:express-as>
         </prosody>
@@ -284,15 +258,11 @@ def text_speech(inp):
             #print("SILENCE PROMPT")
             print(prompt)
 
-            # gets style GPT would like to respond with
-            style = ((tone_gpt3("...")).choices[0].text).split("]")[0]
-            #print(style)
-
             # gets GPT text message response completion
             raspuns = (chat_gpt3("...")).choices[0].text
 
             # formats raspuns
-            raspunsF = bot+" ["+style+"]: " + raspuns
+            raspunsF = bot+": " + raspuns
             #raspunsF = bot+": "+raspuns
 
             # prints raspuns
@@ -308,7 +278,7 @@ def text_speech(inp):
             xmlns:mstts="https://www.w3.org/2001/mstts" xml:lang="en-US">
             <voice name="'''+voice+'''">
             <prosody rate="medium">
-            <mstts:express-as style="'''+style+'''" styledegree="0.5">
+            <mstts:express-as style="Friendly" styledegree="0.5">
             '''+ raspuns +'''
             </mstts:express-as>
             </prosody>
