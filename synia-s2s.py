@@ -1,5 +1,5 @@
 #import random
-#import keyboard
+import keyboard
 #import whisper
 #import io
 #import time
@@ -68,7 +68,7 @@ timeCurrent = "12:23 AM"
 zone = "Rock Pavilion (Zone A)"
 floor = "3 West"
 roomNumber = "A315"
-roomTemperature = "73.4 F"
+roomTemperature = "73.4 F (Only adjustable through TV remote or nurse)"
 dateAdmitted = "11-22-22"
 dateDischarge = "12-10-22"
 
@@ -81,9 +81,9 @@ oxygenSaturation = "96%"
 
 ## conditions and precautions
 lastPainMedRequest = "11-29-22 07:15 AM"
-mobility = "Bed Rest"
+restrictMobility = "Yes, Bed Rest"
 restrictFluid = "Yes, please see nurse"
-diet = "Nothing by mouth after midnight"
+restrictDiet = "Yes, Nothing by mouth after midnight (NPO)"
 fallRisk = "Yes, call for assistance"
 isolation = "Yes, visitors must follow isolation instructions"
 
@@ -125,7 +125,7 @@ dailyMessage = "-\"Hey this is RN Jane. Great job today! See you tomorrow\""
 
 ## Compiled Chart ##
 
-chart = f"Patient: {patient}\nDate of Birth: {dob}\nAge: {age}\nWeight: {weight}\nHeight: {height}\n\nCurrent Date: {dateCurrent}\nCurrent Time: {timeCurrent}\nZone: {zone}\nFloor: {floor}\nRoom: {roomNumber}\nRoom Temperature: {roomTemperature}\nDate Admitted: {dateAdmitted}\nExpected Discharge Date: {dateDischarge}\n\nALLERGIES\n{allergies}\n\nMEDICATIONS\n{medications}\n\nREASON FOR ADMISSION\n{reasonForAdmission}\n\nASSESSMENT\n{assessment}\n\nTREATMENT PLAN\n{treatmentPlan}\n\nFOLLOW-UP\n{followUp}\n\nDISCHARGE PLAN\n{dischargePlan}\n\nCONDITIONS AND PRECAUTIONS\nLast Pain Med Request: {lastPainMedRequest}\nMobility: {mobility}\nFluid Restriction: {restrictFluid}\nDiet: {diet}\nFall Risk: {fallRisk}\nIsolation: {isolation}\n\nVITALS\nBP: {bloodPressure}\nHR: {pulse}\nRR: {respiratoryRate}\nTemp: {temperature}\nO2: {oxygenSaturation}\n\nCARE TEAM\nAttending Provider: {attendingProvider}\nPulmonologist: {pulmonologist}\nRespiratory Therapist: {respiratoryTherapist}\nPhysical Therapist: {physicalTherapist}\nNurse Practitioner: {nursePractitioner}\nRegistered Nurse: {registeredNurse}\nNurse Assistant: {nurseAssistant}\n\nGOALS / PLAN FOR THE DAY\n{goals}\n\nUPCOMING EVENTS\n{events}\n\nUPCOMING CONSULTS\n{consults}\n\nPREVIOUS SHIFT MESSAGES TO PATIENT\n{dailyMessage}\n\n----------------START OF CHAT-------------------\n"
+chart = f"----------------MEDICAL CHART-------------------\n\nPatient: {patient}\nDate of Birth: {dob}\nAge: {age}\nWeight: {weight}\nHeight: {height}\n\nCurrent Date: {dateCurrent}\nCurrent Time: {timeCurrent}\nZone: {zone}\nFloor: {floor}\nRoom: {roomNumber}\nRoom Temperature: {roomTemperature}\nDate Admitted: {dateAdmitted}\nExpected Discharge Date: {dateDischarge}\n\nALLERGIES\n{allergies}\n\nMEDICATIONS\n{medications}\n\nREASON FOR ADMISSION\n{reasonForAdmission}\n\nASSESSMENT\n{assessment}\n\nTREATMENT PLAN\n{treatmentPlan}\n\nFOLLOW-UP\n{followUp}\n\nDISCHARGE PLAN\n{dischargePlan}\n\nCONDITIONS AND PRECAUTIONS\nLast Pain Med Request: {lastPainMedRequest}\nMobility Restriction: {restrictMobility}\nFluid Restriction: {restrictFluid}\nDiet Restriction: {restrictDiet}\nFall Risk: {fallRisk}\nIsolation: {isolation}\n\nVITALS\nBP: {bloodPressure}\nHR: {pulse}\nRR: {respiratoryRate}\nTemp: {temperature}\nO2: {oxygenSaturation}\n\nCARE TEAM\nAttending Provider: {attendingProvider}\nPulmonologist: {pulmonologist}\nRespiratory Therapist: {respiratoryTherapist}\nPhysical Therapist: {physicalTherapist}\nNurse Practitioner: {nursePractitioner}\nRegistered Nurse: {registeredNurse}\nNurse Assistant: {nurseAssistant}\n\nGOALS / PLAN FOR THE DAY\n{goals}\n\nUPCOMING EVENTS\n{events}\n\nUPCOMING CONSULTS\n{consults}\n\nPREVIOUS SHIFT MESSAGES TO PATIENT\n{dailyMessage}\n\n----------------START OF CHAT-------------------\n"
 
 ### SETUP VARIABLES ###
 # concats message history for re-insertion with every prompt
@@ -191,9 +191,9 @@ def concatContext():
 def chat_gpt3(zice):
     response = openai.Completion.create(
         engine="text-davinci-003",
-        prompt= "You are, "+bot+", a virtual bedside assistant at Temple University Hospital for a patient named "+patient+". If nurse intervention is required, kindly instruct the patient to press their nurse call button. Read the patient's chart below and answer any questions that may arise. You are comforting, assuring, empathetic, and kind. Do not bombard or overwhelm the patient with lots of information.\n\n"+chart+context+"\n"+patient+": "+zice+"\n"+bot+" ["+style+"]:",
-        temperature=0.7,
-        max_tokens=128,
+        prompt= "You are, "+bot+", a virtual bedside assistant at Temple University Hospital for a patient named "+patient+". Kindly instruct the patient to press their nurse call button when needed.\n\n"+chart+context+"\n"+patient+": "+zice+"\n"+bot+" ["+style+"]:",
+        temperature=1.0,
+        max_tokens=512,
         top_p=1.0,
         frequency_penalty=0.0,
         presence_penalty=0.0,
@@ -208,7 +208,162 @@ def chat_gpt3(zice):
 """
 def tts(ssml):
     global speech_synthesis_result
+    #speech_synthesis_result = speech_synthesizer.speak_ssml_async(ssml)
     speech_synthesis_result = speech_synthesizer.speak_ssml_async(ssml).get()
+    
+# given input stt
+# generates style and response from GPT-3
+# synthesizes response tts
+def textSpeech(inp):
+    
+    inp.encode("utf-8")
+    
+    # parses and formats patient input
+    prompt = patient+": "+inp
+
+    # global counter and helper variables
+    global silenceCount
+    global context
+    global style
+    global raspuns
+    global raspunsF
+    global done
+
+    # processes non-silent interaction
+    if inp != "":
+        
+        # prints status
+        #print("NON-SILENCE")
+        print(prompt)
+
+        # gets style GPT would like to respond with
+        style = ((tone_gpt3(inp)).choices[0].text).split("]")[0]
+        #print(style)
+
+        # gets GPT text message response completion
+        raspuns = (chat_gpt3(inp)).choices[0].text
+        
+        # formats raspuns
+        raspunsF = bot+" ["+style+"]: " + raspuns
+        #raspunsF = bot+": "+raspuns
+
+        # prints raspuns
+        print(raspunsF)
+        #print(raspuns)
+        
+        messages.append("\n"+prompt+"\n"+raspunsF)
+
+        # concats message to memory/history
+        concatContext()
+
+        # SSML for TTS with response and style
+        xmlString = '''<speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis"
+        xmlns:mstts="https://www.w3.org/2001/mstts" xml:lang="en-US">
+        <voice name="'''+voice+'''">
+        <prosody rate="medium">
+        <mstts:express-as style="'''+style+'''" styledegree="0.5">
+        '''+ raspuns +'''
+        </mstts:express-as>
+        </prosody>
+        </voice>
+        </speak>'''
+
+        # synthesizes TTS with input SSML
+        tts(xmlString)
+
+        # resets silence count to 0
+        silenceCount = 0
+
+        # marks interaction
+        done = True
+
+    # processes silent interaction
+    else:
+
+        # checks if patient has been silent for certain amount of time
+        if silenceCount == 2:
+            
+            # imitates silent input
+            prompt = patient+": ..."
+
+            # prints status
+            #print("SILENCE PROMPT")
+            print(prompt)
+
+            # gets style GPT would like to respond with
+            style = ((tone_gpt3("...")).choices[0].text).split("]")[0]
+            #print(style)
+
+            # gets GPT text message response completion
+            raspuns = (chat_gpt3("...")).choices[0].text
+
+            # formats raspuns
+            raspunsF = bot+" ["+style+"]: " + raspuns
+            #raspunsF = bot+": "+raspuns
+
+            # prints raspuns
+            print(raspunsF)
+
+            messages.append("\n"+prompt+"\n"+raspunsF)
+
+            # concats message to memory/history
+            concatContext()
+
+            # SSML for TTS with response and style
+            xmlString = '''<speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis"
+            xmlns:mstts="https://www.w3.org/2001/mstts" xml:lang="en-US">
+            <voice name="'''+voice+'''">
+            <prosody rate="medium">
+            <mstts:express-as style="'''+style+'''" styledegree="0.5">
+            '''+ raspuns +'''
+            </mstts:express-as>
+            </prosody>
+            </voice>
+            </speak>'''
+
+            # synthesizes TTS with input SSML
+            tts(xmlString)
+
+            # resets silence count to 0
+            silenceCount = 0
+
+            # marks interaction
+            done = True
+
+        # increases silence count
+        #print("SILENCE")
+        silenceCount += 1
+        
+def listen():
+    
+    global done
+    
+    # listens for speech
+    while not done:
+        
+        print("\n|||||||||| LISTENING ||||||||||\n")
+        playsound('start.mp3', False)
+        
+        # gets azure stt
+        speech_recognition_result = speech_recognizer.recognize_once_async().get()
+        #speech_recognizer.start_continuous_recognition_async()
+
+        playsound('stop.mp3', False)
+
+        # gets tts from azure stt
+        speech_recognizer.recognized.connect(textSpeech(speech_recognition_result.text))
+
+        # Start listening for keystrokes
+        #keyboard.on_press(on_key_press)
+    """
+
+    while not done:
+
+        message = input(patient + ": ")
+
+        textSpeech(message)
+    """
+    
 
 while (True):
 
@@ -217,154 +372,13 @@ while (True):
         # controls whether interaction has been recieved and processed or not
         done = False
         
-        # given input stt
-        # generates style and response from GPT-3
-        # synthesizes response tts
-        def textSpeech(inp):
-            
-            inp.encode("utf-8")
-            
-            # parses and formats patient input
-            prompt = patient+": "+inp
-
-            # global counter and helper variables
-            global silenceCount
-            global context
-            global style
-            global raspuns
-            global raspunsF
-
-            # processes non-silent interaction
-            if inp != "":
-                
-                # prints status
-                #print("NON-SILENCE")
-                print(prompt)
-
-                # gets style GPT would like to respond with
-                style = ((tone_gpt3(inp)).choices[0].text).split("]")[0]
-                #print(style)
-
-                # gets GPT text message response completion
-                raspuns = (chat_gpt3(inp)).choices[0].text
-                
-                # formats raspuns
-                raspunsF = bot+" ["+style+"]: " + raspuns
-                #raspunsF = bot+": "+raspuns
-
-                # prints raspuns
-                print(raspunsF)
-                #print(raspuns)
-                
-                messages.append("\n"+prompt+"\n"+raspunsF)
-
-                # concats message to memory/history
-                concatContext()
-
-                # SSML for TTS with response and style
-                xmlStringReg = '''<speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="en-US">
-                <voice name="'''+voice+'''">
-                '''+ raspuns +'''
-                </voice>
-                </speak>'''
-                xmlString = '''<speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis"
-                xmlns:mstts="https://www.w3.org/2001/mstts" xml:lang="en-US">
-                <voice name="'''+voice+'''">
-                <prosody rate="medium">
-                <mstts:express-as style="'''+style+'''" styledegree="0.5">
-                '''+ raspuns +'''
-                </mstts:express-as>
-                </prosody>
-                </voice>
-                </speak>'''
-
-                # synthesizes TTS with input SSML
-                tts(xmlString)
-
-                # resets silence count to 0
-                silenceCount = 0
-
-                # marks interaction
-                done = True
-
-            # processes silent interaction
-            else:
-
-                # checks if patient has been silent for certain amount of time
-                if silenceCount == 2:
-                    
-                    # imitates silent input
-                    prompt = patient+": ..."
-
-                    # prints status
-                    #print("SILENCE PROMPT")
-                    print(prompt)
-
-                    # gets style GPT would like to respond with
-                    style = ((tone_gpt3("...")).choices[0].text).split("]")[0]
-                    #print(style)
-
-                    # gets GPT text message response completion
-                    raspuns = (chat_gpt3("...")).choices[0].text
-
-                    # formats raspuns
-                    raspunsF = bot+" ["+style+"]: " + raspuns
-                    #raspunsF = bot+": "+raspuns
-
-                    # prints raspuns
-                    print(raspunsF)
-
-                    messages.append("\n"+prompt+"\n"+raspunsF)
-
-                    # concats message to memory/history
-                    concatContext()
-
-                    # SSML for TTS with response and style
-                    xmlStringReg = '''<speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="en-US">
-                    <voice name="'''+voice+'''">
-                    '''+ raspuns +'''
-                    </voice>
-                    </speak>'''
-                    xmlString = '''<speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis"
-                    xmlns:mstts="https://www.w3.org/2001/mstts" xml:lang="en-US">
-                    <voice name="'''+voice+'''">
-                    <prosody rate="medium">
-                    <mstts:express-as style="'''+style+'''" styledegree="0.5">
-                    '''+ raspuns +'''
-                    </mstts:express-as>
-                    </prosody>
-                    </voice>
-                    </speak>'''
-
-                    # synthesizes TTS with input SSML
-                    tts(xmlString)
-
-                    # resets silence count to 0
-                    silenceCount = 0
-
-                    # marks interaction
-                    done = True
-
-                # increases silence count
-                #print("SILENCE")
-                silenceCount += 1
+        print("\nPress the space key to continue...")
         
-        # listens for speech
-        while not done:
-            
-            print("\n|||||||||| LISTENING ||||||||||\n")
-            playsound('start.mp3', False)
-            
-            # gets azure stt
-            speech_recognition_result = speech_recognizer.recognize_once_async().get()
-
-            playsound('stop.mp3', False)
-
-            # gets tts from azure stt
-            speech_recognizer.recognized.connect(textSpeech(speech_recognition_result.text))
-
-            # Start listening for keystrokes
-            #keyboard.on_press(on_key_press)
+        while True:  # making a loop
+            if keyboard.is_pressed('space'):  # if key 'space' is pressed 
+                break  # finishing the loop
+        
+        listen()
 
     # excepts if not understood
     except Exception as e:

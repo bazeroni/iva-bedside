@@ -28,7 +28,7 @@ oxygenSaturation = "96%"
 
 ## conditions and precautions
 lastPainMedRequest = "11-29-22 07:15 AM"
-mobility = "Bed Rest"
+restrictMobility = "Yes, Bed Rest"
 restrictFluid = "Yes, please see nurse"
 diet = "Nothing by mouth after midnight"
 fallRisk = "Yes, call for assistance"
@@ -41,7 +41,7 @@ allergies = "-Peanut\n-Shellfish\n-Penicillin"
 medications = "-Amoxicillin\n-Ibuprofen"
 
 ## reason for admission
-reasonForAdmission = "Suspected pneumonia"
+reasonForAdmission = "-Suspected pneumonia"
 
 ## assessment
 assessment = "-Chest X-ray shows infiltrates in the lower lobes of the lungs\n-Cough with yellow sputum production\n-Shortness of breath"
@@ -66,12 +66,12 @@ nurseAssistant = "David"
 
 ## agenda
 goals = "-Rest\n-Coughing Exercises\n-Family Meeting AM"
-events = "-Morning: Radiology\n-Afternoon: Pulmonologist"
+events = "Morning: Radiology\nAfternoon: Pulmonologist"
 consults = "-West Chester Radiology"
-dailyMessage = "\"Hey this is RN Jane. Great job today! See you tomorrow\""
+dailyMessage = "-\"Hey this is RN Jane. Great job today! See you tomorrow\""
 
 ## Compiled Chart ##
 
-chart = f"Patient: {patient}\nDate of Birth: {dob}\nAge: {age}\nWeight: {weight}\nHeight: {height}\n\nCurrent Date: {dateCurrent}\nCurrent Time: {timeCurrent}\nZone: {zone}\nFloor: {floor}\nRoom: {roomNumber}\nRoom Temperature: {roomTemperature}\nDate Admitted: {dateAdmitted}\nExpected Discharge Date: {dateDischarge}\n\nALLERGIES\n{allergies}\n\nMEDICATIONS\n{medications}\n\nREASON FOR ADMISSION\n{reasonForAdmission}\n\nASSESSMENT\n{assessment}\n\nTREATMENT PLAN\n{treatmentPlan}\n\nFOLLOW-UP\n{followUp}\n\nDISCHARGE PLAN\n{dischargePlan}\n\nCONDITIONS AND PRECAUTIONS\nLast Pain Med Request: {lastPainMedRequest}\nMobility: {mobility}\nFluid Restriction: {restrictFluid}\nDiet: {diet}\nFall Risk: {fallRisk}\nIsolation: {isolation}\n\nVITALS\nBP: {bloodPressure}\nHR: {pulse}\nRR: {respiratoryRate}\nTemp: {temperature}\nO2: {oxygenSaturation}\n\nCARE TEAM\nAttending Provider: {attendingProvider}\nPulmonologist: {pulmonologist}\nRespiratory Therapist: {respiratoryTherapist}\nPhysical Therapist: {physicalTherapist}\nNurse Practitioner: {nursePractitioner}\nRegistered Nurse: {registeredNurse}\nNurse Assistant: {nurseAssistant}\n\nGOALS / PLAN FOR THE DAY\n{goals}\n\nUPCOMING EVENTS\n{events}\n\nUPCOMING CONSULTS\n{consults}\n\nPREVIOUS SHIFT MESSAGE TO PATIENT\n{dailyMessage}\n\n----------------START OF CHAT-------------------\n"
+chart = f"----------------"+patient.upper()+"'S CHART-------------------\nPatient: {patient}\nDate of Birth: {dob}\nAge: {age}\nWeight: {weight}\nHeight: {height}\n\nCurrent Date: {dateCurrent}\nCurrent Time: {timeCurrent}\nZone: {zone}\nFloor: {floor}\nRoom: {roomNumber}\nRoom Temperature: {roomTemperature}\nDate Admitted: {dateAdmitted}\nExpected Discharge Date: {dateDischarge}\n\nALLERGIES\n{allergies}\n\nMEDICATIONS\n{medications}\n\nREASON FOR ADMISSION\n{reasonForAdmission}\n\nASSESSMENT\n{assessment}\n\nTREATMENT PLAN\n{treatmentPlan}\n\nFOLLOW-UP\n{followUp}\n\nDISCHARGE PLAN\n{dischargePlan}\n\nCONDITIONS AND PRECAUTIONS\nLast Pain Med Request: {lastPainMedRequest}\nMobility Restriction: {restrictMobility}\nFluid Restriction: {restrictFluid}\nDiet: {diet}\nFall Risk: {fallRisk}\nIsolation: {isolation}\n\nVITALS\nBP: {bloodPressure}\nHR: {pulse}\nRR: {respiratoryRate}\nTemp: {temperature}\nO2: {oxygenSaturation}\n\nCARE TEAM\nAttending Provider: {attendingProvider}\nPulmonologist: {pulmonologist}\nRespiratory Therapist: {respiratoryTherapist}\nPhysical Therapist: {physicalTherapist}\nNurse Practitioner: {nursePractitioner}\nRegistered Nurse: {registeredNurse}\nNurse Assistant: {nurseAssistant}\n\nGOALS / PLAN FOR THE DAY\n{goals}\n\nUPCOMING EVENTS\n{events}\n\nUPCOMING CONSULTS\n{consults}\n\nPREVIOUS SHIFT MESSAGES TO PATIENT\n{dailyMessage}\n\n----------------START OF CHAT-------------------\n"
 
 print(chart)
