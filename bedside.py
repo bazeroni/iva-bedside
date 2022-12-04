@@ -18,20 +18,79 @@ openai.api_key=OAI_API_KEY #OPEN AI INIT
 # configs tts
 speech_config = speechsdk.SpeechConfig(subscription=AZURE_SPEECH_KEY, region="eastus")
 
-## STT LANGUAGE ##
+## STT LANGUAGES ##
 
 #speech_config.speech_recognition_language="en-US"
-#speech_config.speech_recognition_language="es-US"
-speech_config.speech_recognition_language="fil-PH"
 
-## TTS LANGUAGE ##
+#speech_config.speech_recognition_language="es-US"
+#speech_config.speech_recognition_language="es-MX"
+#speech_config.speech_recognition_language="es-PR"
+#speech_config.speech_recognition_language="es-DO"
+#speech_config.speech_recognition_language="es-SV"
+#speech_config.speech_recognition_language="es-CU"
+
+#speech_config.speech_recognition_language="yue-CN"
+#speech_config.speech_recognition_language="zh-CN"
+
+#speech_config.speech_recognition_language="vi-VN"
+
+#speech_config.speech_recognition_language="ru-RU"
+
+#speech_config.speech_recognition_language="ar-EG"
+#speech_config.speech_recognition_language="ar-SY"
+#speech_config.speech_recognition_language="ar-MA"
+
+#speech_config.speech_recognition_language="fr-FR"
+
+#speech_config.speech_recognition_language="km-KH"
+
+#speech_config.speech_recognition_language="it-IT"
+
+#speech_config.speech_recognition_language="fil-PH"
+
+## TTS LANGUAGES ##
 # other than Aria, style compatible (-empathetic) with Davis, Guy, Jane, Jason, Jenny, Nancy, Tony
 
+# ENGLISH #
 #speech_config.speech_synthesis_voice_name='en-US-NancyNeural'
+#speech_config.speech_synthesis_voice_name='en-US-JennyNeural'
+#speech_config.speech_synthesis_voice_name='en-US-AriaNeural'
 #speech_config.speech_synthesis_voice_name='en-US-JennyMultilingualNeural'
-#speech_config.speech_synthesis_voice_name='es-PR-KarinaNeural'
-speech_config.speech_synthesis_voice_name='fil-PH-BlessicaNeural'
-#speech_config.speech_synthesis_voice_name='es-MX-CarlotaNeural'
+
+# SPANISH #
+#speech_config.speech_synthesis_voice_name='es-US-PalomaNeural' # united states
+#speech_config.speech_synthesis_voice_name='es-MX-CarlotaNeural' # mexican
+#speech_config.speech_synthesis_voice_name='es-PR-KarinaNeural' # puerto rican
+#speech_config.speech_synthesis_voice_name='es-DO-RamonaNeural' # dominican
+#speech_config.speech_synthesis_voice_name='es-SV-LorenaNeural' # salvadorean
+#speech_config.speech_synthesis_voice_name='es-CU-BelkysNeural' # cuban
+
+# CHINESE #
+#speech_config.speech_synthesis_voice_name='yue-CN-XiaoMinNeural' # cantonese
+#speech_config.speech_synthesis_voice_name='zh-CN-XiaochenNeural' # mandarin
+
+# VIETNAMESE #
+#speech_config.speech_synthesis_voice_name='vi-VN-HoaiMyNeural'
+
+# RUSSIAN #
+#speech_config.speech_synthesis_voice_name='ru-RU-DariyaNeural'
+
+# ARABIC #
+#speech_config.speech_synthesis_voice_name='ar-EG-SalmaNeural' # egyptian
+#speech_config.speech_synthesis_voice_name='ar-SY-AmanyNeural' # syrian
+#speech_config.speech_synthesis_voice_name='ar-MA-MounaNeural' # moroccan
+
+# FRENCH #
+#speech_config.speech_synthesis_voice_name='fr-FR-BrigitteNeural'
+
+# KHMER #
+#speech_config.speech_synthesis_voice_name='km-KH-PisethNeural'
+
+# ITALIAN #
+#speech_config.speech_synthesis_voice_name='it-IT-ElsaNeural'
+
+# TAGALOG #
+#speech_config.speech_synthesis_voice_name='fil-PH-BlessicaNeural'
 
 # sets voice
 voice = speech_config.speech_synthesis_voice_name
