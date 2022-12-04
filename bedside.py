@@ -130,7 +130,6 @@ chart = f"----------------MEDICAL CHART-------------------\n\nPatient: {patient}
 context = ""
 # stores separate messages in list to be concatenated
 messages = []
-# counts number of times patient silence for input
 silenceCount = 0
 
 # Define a callback function that will be called
@@ -254,7 +253,7 @@ def think(inp):
     
     # assumes there is no input
     # checks if has been silent for three rounds
-    elif silenceCount == 2:
+    elif silenceCount == 3:
         
         # imitates silent input
         prompt = patient+": ..."
@@ -264,6 +263,8 @@ def think(inp):
         response = chat_gpt3("...")
         
         respond(prompt, response)
+        
+        return
             
     # increases silence count
     silenceCount += 1
@@ -287,7 +288,7 @@ def recognize():
 def listen():
     
     # listens for speech
-    while True:
+     while True:
 
         playsound('start.mp3', False)
         
