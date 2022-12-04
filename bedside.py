@@ -22,7 +22,7 @@ speech_config = speechsdk.SpeechConfig(subscription=AZURE_SPEECH_KEY, region="ea
 
 #speech_config.speech_recognition_language="en-US"
 
-#speech_config.speech_recognition_language="es-US"
+speech_config.speech_recognition_language="es-US"
 #speech_config.speech_recognition_language="es-MX"
 #speech_config.speech_recognition_language="es-PR"
 #speech_config.speech_recognition_language="es-DO"
@@ -58,7 +58,7 @@ speech_config = speechsdk.SpeechConfig(subscription=AZURE_SPEECH_KEY, region="ea
 #speech_config.speech_synthesis_voice_name='en-US-JennyMultilingualNeural'
 
 # SPANISH #
-#speech_config.speech_synthesis_voice_name='es-US-PalomaNeural' # united states
+speech_config.speech_synthesis_voice_name='es-US-PalomaNeural' # united states
 #speech_config.speech_synthesis_voice_name='es-MX-CarlotaNeural' # mexican
 #speech_config.speech_synthesis_voice_name='es-PR-KarinaNeural' # puerto rican
 #speech_config.speech_synthesis_voice_name='es-DO-RamonaNeural' # dominican
@@ -84,7 +84,7 @@ speech_config = speechsdk.SpeechConfig(subscription=AZURE_SPEECH_KEY, region="ea
 #speech_config.speech_synthesis_voice_name='fr-FR-BrigitteNeural'
 
 # KHMER #
-#speech_config.speech_synthesis_voice_name='km-KH-PisethNeural'
+#speech_config.speech_synthesis_voice_name='km-KH-SreymomNeural'
 
 # ITALIAN #
 #speech_config.speech_synthesis_voice_name='it-IT-ElsaNeural'
@@ -184,7 +184,7 @@ dailyMessage = "-\"Hey this is RN Jane. Great job today! See you tomorrow\""
 
 ## Compiled Chart ##
 
-chart = f"----------------MEDICAL CHART-------------------\n\nPatient: {patient}\nDate of Birth: {dob}\nAge: {age}\nWeight: {weight}\nHeight: {height}\nPrimary Language: {primaryLanguage}\n\nCurrent Date: {dateCurrent}\nCurrent Time: {timeCurrent}\nZone: {zone}\nFloor: {floor}\nRoom: {roomNumber}\nRoom Temperature: {roomTemperature}\nDate Admitted: {dateAdmitted}\nExpected Discharge Date: {dateDischarge}\n\nALLERGIES\n{allergies}\n\nMEDICATIONS\n{medications}\n\nREASON FOR ADMISSION\n{reasonForAdmission}\n\nASSESSMENT\n{assessment}\n\nTREATMENT PLAN\n{treatmentPlan}\n\nFOLLOW-UP\n{followUp}\n\nDISCHARGE PLAN\n{dischargePlan}\n\nCONDITIONS AND PRECAUTIONS\nLast Pain Medication: {lastPainMed}\nNext Pain Medication: {nextPainMed}\nMobility Restriction: {restrictMobility}\nFluid Restriction: {restrictFluid}\nDiet Restriction: {restrictDiet}\nFall Risk: {fallRisk}\nIsolation: {isolation}\n\nVITALS\nBP: {bloodPressure}\nHR: {pulse}\nRR: {respiratoryRate}\nTemp: {temperature}\nO2: {oxygenSaturation}\n\nCARE TEAM\nAttending Provider: {attendingProvider}\nPulmonologist: {pulmonologist}\nRespiratory Therapist: {respiratoryTherapist}\nPhysical Therapist: {physicalTherapist}\nNurse Practitioner: {nursePractitioner}\nRegistered Nurse: {registeredNurse}\nNurse Assistant: {nurseAssistant}\n\nGOALS / PLAN FOR THE DAY\n{goals}\n\nUPCOMING EVENTS\n{events}\n\nUPCOMING CONSULTS\n{consults}\n\nPREVIOUS SHIFT MESSAGES TO PATIENT\n{dailyMessage}\n\n----------------START OF CHAT-------------------\n"
+chart = f"----------------MEDICAL CHART-------------------\n\nPatient: {patient}\nDate of Birth: {dob}\nAge: {age}\nWeight: {weight}\nHeight: {height}\nPatient IANA Language Code: {primaryLanguage}\n\nCurrent Date: {dateCurrent}\nCurrent Time: {timeCurrent}\nZone: {zone}\nFloor: {floor}\nRoom: {roomNumber}\nRoom Temperature: {roomTemperature}\nDate Admitted: {dateAdmitted}\nExpected Discharge Date: {dateDischarge}\n\nALLERGIES\n{allergies}\n\nMEDICATIONS\n{medications}\n\nREASON FOR ADMISSION\n{reasonForAdmission}\n\nASSESSMENT\n{assessment}\n\nTREATMENT PLAN\n{treatmentPlan}\n\nFOLLOW-UP\n{followUp}\n\nDISCHARGE PLAN\n{dischargePlan}\n\nCONDITIONS AND PRECAUTIONS\nLast Pain Medication: {lastPainMed}\nNext Pain Medication: {nextPainMed}\nMobility Restriction: {restrictMobility}\nFluid Restriction: {restrictFluid}\nDiet Restriction: {restrictDiet}\nFall Risk: {fallRisk}\nIsolation: {isolation}\n\nVITALS\nBP: {bloodPressure}\nHR: {pulse}\nRR: {respiratoryRate}\nTemp: {temperature}\nO2: {oxygenSaturation}\n\nCARE TEAM\nAttending Provider: {attendingProvider}\nPulmonologist: {pulmonologist}\nRespiratory Therapist: {respiratoryTherapist}\nPhysical Therapist: {physicalTherapist}\nNurse Practitioner: {nursePractitioner}\nRegistered Nurse: {registeredNurse}\nNurse Assistant: {nurseAssistant}\n\nGOALS / PLAN FOR THE DAY\n{goals}\n\nUPCOMING EVENTS\n{events}\n\nUPCOMING CONSULTS\n{consults}\n\nPREVIOUS SHIFT MESSAGES TO PATIENT\n{dailyMessage}\n\n----------------START OF CHAT-------------------\n"
 
 ### SETUP VARIABLES ###
 # concatenates message history for re-insertion with every prompt
@@ -224,7 +224,7 @@ def chat_gpt3(zice):
     start_time = time.time()
     response = openai.Completion.create(
         engine="text-davinci-003",
-        prompt= "You are, "+bot+", a clinical bedside virtual intelligent assistant (VIA) at Trinity University Hospital for a patient named "+patient+". Speak to "+patient+" in "+speech_config.speech_recognition_language+" with patience, empathy, and assurance. Kindly instruct the patient to press their nurse call button on their TV remote when needed.\n\n"+chart+context+"\n"+patient+": "+zice+"\n"+bot+":",
+        prompt= "You are, "+bot+", a clinical bedside virtual intelligent assistant (VIA) at Trinity University Hospital for a patient named "+patient+". Speak to "+patient+" only in "+primaryLanguage+" with patience, empathy, and assurance. Kindly instruct the patient to press their nurse call button on their TV remote when needed.\n\n"+chart+context+"\n"+patient+": "+zice+"\n"+bot+":",
         #prompt= "You are, "+bot+", a clinical bedside virtual intelligent assistant (VIA) at Trinity University Hospital for a patient named "+patient+". Kindly instruct the patient to press their nurse call button on their TV remote when needed.\n\n"+chart+context+"\n"+patient+": "+zice+"\n"+bot+":",
         temperature=0.7,
         max_tokens=256,
@@ -247,8 +247,11 @@ def chat_gpt3(zice):
         event_time = time.time() - start_time  # calculate the time delay of the event
         collected_events.append(event)  # save the event response
         event_text = event['choices'][0]['text']  # extract the text
-        completion_text += event_text  # append the text
-        print(event_text, end="")  # print the delay and text
+        # Encode the string using the utf-8 codec
+        encoded_text = event_text.encode('utf-8')
+        decoded_text = encoded_text.decode('utf-8')
+        completion_text += decoded_text  # append the text
+        print(decoded_text, end="")  # print the delay and text
         
     print(f" [{responseTime:.2f} S]\n")
     return completion_text
@@ -315,7 +318,7 @@ def think(inp):
     
     # assumes there is no input
     # checks if has been silent for three rounds
-    elif silenceCount == 3:
+    elif silenceCount == 2:
         
         # imitates silent input
         prompt = patient+": ..."
@@ -350,7 +353,7 @@ def recognize():
 def listen():
     
     # listens for speech
-     while True:
+    while True:
 
         playsound('start.mp3', False)
         
@@ -365,7 +368,7 @@ def listen():
 
         #message = input(patient + ": ")
         #think(message)
-
+        
 def wait_for_key(key):
     
     while True:  # making a loop
