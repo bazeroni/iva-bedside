@@ -27,7 +27,7 @@ speech_config.speech_recognition_language="en-US"
 # configs tts voice
 # other than Aria, style compatible (-empathetic) with Davis, Guy, Jane, Jason, Jenny, Nancy, Tony
 
-speech_config.speech_synthesis_voice_name='en-US-JennyNeural'
+speech_config.speech_synthesis_voice_name='en-US-NancyNeural'
 #speech_config.speech_synthesis_voice_name='en-US-JennyMultilingualNeural'
 #speech_config.speech_synthesis_voice_name='en-US-AIGenerate1Neural'
 #speech_config.speech_synthesis_voice_name='es-MX-CarlotaNeural'
@@ -65,7 +65,7 @@ timeCurrent = "12:23 AM"
 zone = "Tioga Pavilion (Zone A)"
 floor = "3 West"
 roomNumber = "A-315"
-roomTemperature = "73.4 F (Only patient/nurse adjustable through TV remote )"
+roomTemperature = "73.4 F (Only patient/nurse adjustable through button on TV remote)"
 dateAdmitted = "11-22-22"
 dateDischarge = "12-10-22"
 
@@ -164,6 +164,7 @@ def chat_gpt3(zice):
     response = openai.Completion.create(
         engine="text-davinci-003",
         prompt= "You are, "+bot+", a clinical bedside virtual intelligent assistant (VIA) at Trinity University Hospital for a patient named "+patient+". Kindly instruct the patient to press their nurse call button on their TV remote when needed.\n\n"+chart+context+"\n"+patient+": "+zice+"\n"+bot+":",
+        #prompt= "You are, "+bot+", a clinical bedside virtual intelligent assistant (VIA) at Trinity University Hospital for a patient named "+patient+". Kindly instruct the patient to press their nurse call button on their TV remote when needed.\n\n"+chart+context+"\n"+patient+": "+zice+"\n"+bot+":",
         temperature=0.7,
         max_tokens=256,
         top_p=1.0,
@@ -217,7 +218,7 @@ def respond(prompt, response):
     xmlns:mstts="https://www.w3.org/2001/mstts" xml:lang="en-US">
     <voice name="'''+voice+'''">
     <prosody rate="medium">
-    <mstts:express-as style="Friendly" styledegree="0.5">
+    <mstts:express-as style="Friendly" styledegree="2">
     '''+ response +'''
     </mstts:express-as>
     </prosody>
