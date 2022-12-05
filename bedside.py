@@ -1,5 +1,6 @@
 import keyboard
 import os
+import re
 import time
 import openai
 import azure.cognitiveservices.speech as speechsdk
@@ -20,9 +21,9 @@ speech_config = speechsdk.SpeechConfig(subscription=AZURE_SPEECH_KEY, region="ea
 
 ## STT LANGUAGES ##
 
-#speech_config.speech_recognition_language="en-US"
+speech_config.speech_recognition_language="en-US"
 
-speech_config.speech_recognition_language="es-US"
+#speech_config.speech_recognition_language="es-US"
 #speech_config.speech_recognition_language="es-MX"
 #speech_config.speech_recognition_language="es-PR"
 #speech_config.speech_recognition_language="es-DO"
@@ -51,14 +52,16 @@ speech_config.speech_recognition_language="es-US"
 ## TTS LANGUAGES ##
 # other than Aria, style compatible (-empathetic) with Davis, Guy, Jane, Jason, Jenny, Nancy, Tony
 
+style = "Friendly"
+
 # ENGLISH #
-#speech_config.speech_synthesis_voice_name='en-US-NancyNeural'
+speech_config.speech_synthesis_voice_name='en-US-NancyNeural'
 #speech_config.speech_synthesis_voice_name='en-US-JennyNeural'
 #speech_config.speech_synthesis_voice_name='en-US-AriaNeural'
 #speech_config.speech_synthesis_voice_name='en-US-JennyMultilingualNeural'
 
 # SPANISH #
-speech_config.speech_synthesis_voice_name='es-US-PalomaNeural' # united states
+#speech_config.speech_synthesis_voice_name='es-US-PalomaNeural' # united states
 #speech_config.speech_synthesis_voice_name='es-MX-CarlotaNeural' # mexican
 #speech_config.speech_synthesis_voice_name='es-PR-KarinaNeural' # puerto rican
 #speech_config.speech_synthesis_voice_name='es-DO-RamonaNeural' # dominican
@@ -109,7 +112,7 @@ speech_recognizer = speechsdk.SpeechRecognizer(speech_config=speech_config, audi
 speech_synthesizer = speechsdk.SpeechSynthesizer(speech_config=speech_config, audio_config=tts_config)
 
 # sets up identifiers for conversation
-bot = "VIA"
+bot = "IVA"
 patient = "Andrew Lopez"
 
 ### bedside variables ###
@@ -145,6 +148,7 @@ restrictFluid = "Yes, fluid restriction, please see nurse"
 restrictDiet = "Yes, nothing by mouth after midnight (NPO)"
 fallRisk = "Yes, call for assistance"
 isolation = "Yes, visitors must follow isolation instructions"
+covid = "No"
 
 ## allergies
 allergies = "-Peanut\n-Shellfish\n-Penicillin"
@@ -182,9 +186,12 @@ events = "Morning: Radiology\nAfternoon: Pulmonologist"
 consults = "-West Chester Radiology"
 dailyMessage = "-\"Hey this is RN Jane. Great job today! See you tomorrow\""
 
+## commands
+currentRequests = []
+
 ## Compiled Chart ##
 
-chart = f"----------------MEDICAL CHART-------------------\n\nPatient: {patient}\nDate of Birth: {dob}\nAge: {age}\nWeight: {weight}\nHeight: {height}\nPatient IANA Language Code: {primaryLanguage}\n\nCurrent Date: {dateCurrent}\nCurrent Time: {timeCurrent}\nZone: {zone}\nFloor: {floor}\nRoom: {roomNumber}\nRoom Temperature: {roomTemperature}\nDate Admitted: {dateAdmitted}\nExpected Discharge Date: {dateDischarge}\n\nALLERGIES\n{allergies}\n\nMEDICATIONS\n{medications}\n\nREASON FOR ADMISSION\n{reasonForAdmission}\n\nASSESSMENT\n{assessment}\n\nTREATMENT PLAN\n{treatmentPlan}\n\nFOLLOW-UP\n{followUp}\n\nDISCHARGE PLAN\n{dischargePlan}\n\nCONDITIONS AND PRECAUTIONS\nLast Pain Medication: {lastPainMed}\nNext Pain Medication: {nextPainMed}\nMobility Restriction: {restrictMobility}\nFluid Restriction: {restrictFluid}\nDiet Restriction: {restrictDiet}\nFall Risk: {fallRisk}\nIsolation: {isolation}\n\nVITALS\nBP: {bloodPressure}\nHR: {pulse}\nRR: {respiratoryRate}\nTemp: {temperature}\nO2: {oxygenSaturation}\n\nCARE TEAM\nAttending Provider: {attendingProvider}\nPulmonologist: {pulmonologist}\nRespiratory Therapist: {respiratoryTherapist}\nPhysical Therapist: {physicalTherapist}\nNurse Practitioner: {nursePractitioner}\nRegistered Nurse: {registeredNurse}\nNurse Assistant: {nurseAssistant}\n\nGOALS / PLAN FOR THE DAY\n{goals}\n\nUPCOMING EVENTS\n{events}\n\nUPCOMING CONSULTS\n{consults}\n\nPREVIOUS SHIFT MESSAGES TO PATIENT\n{dailyMessage}\n\n----------------START OF CHAT-------------------\n"
+chart = f"----------------MEDICAL CHART-------------------\n\nPatient: {patient}\nDate of Birth: {dob}\nAge: {age}\nWeight: {weight}\nHeight: {height}\nPatient IANA Language Code: {primaryLanguage}\n\nCurrent Date: {dateCurrent}\nCurrent Time: {timeCurrent}\nZone: {zone}\nFloor: {floor}\nRoom: {roomNumber}\nRoom Temperature: {roomTemperature}\nDate Admitted: {dateAdmitted}\nExpected Discharge Date: {dateDischarge}\n\nALLERGIES\n{allergies}\n\nMEDICATIONS\n{medications}\n\nREASON FOR ADMISSION\n{reasonForAdmission}\n\nASSESSMENT\n{assessment}\n\nTREATMENT PLAN\n{treatmentPlan}\n\nFOLLOW-UP\n{followUp}\n\nDISCHARGE PLAN\n{dischargePlan}\n\nCONDITIONS AND PRECAUTIONS\nLast Pain Medication: {lastPainMed}\nNext Pain Medication: {nextPainMed}\nMobility Restriction: {restrictMobility}\nFluid Restriction: {restrictFluid}\nDiet Restriction: {restrictDiet}\nFall Risk: {fallRisk}\nIsolation: {isolation}\n\nVITALS\nBP: {bloodPressure}\nHR: {pulse}\nRR: {respiratoryRate}\nTemp: {temperature}\nO2: {oxygenSaturation}\n\nCARE TEAM\nAttending Provider: {attendingProvider}\nPulmonologist: {pulmonologist}\nRespiratory Therapist: {respiratoryTherapist}\nPhysical Therapist: {physicalTherapist}\nNurse Practitioner: {nursePractitioner}\nRegistered Nurse: {registeredNurse}\nNurse Assistant: {nurseAssistant}\n\nGOALS / PLAN FOR THE DAY\n{goals}\n\nUPCOMING EVENTS\n{events}\n\nUPCOMING CONSULTS\n{consults}\n\nPREVIOUS SHIFT MESSAGES TO PATIENT\n{dailyMessage}\n\n----------------COMMANDS-------------------\n\nInsert a command and it's parameter between brackets before each message if a patient requests something.\n\n[NURSE CALL: (REPLACE PARAMETER WITH REQUEST)]\n\n----------------START OF CHAT-------------------\n"
 
 ### SETUP VARIABLES ###
 # concatenates message history for re-insertion with every prompt
@@ -208,7 +215,7 @@ def concatenate_context():
     global messages
     global context
     
-    if len(messages) == 2:
+    if len(messages) == 3:
         messages.pop()
         
     #print(len(messages))
@@ -224,8 +231,8 @@ def chat_gpt3(zice):
     start_time = time.time()
     response = openai.Completion.create(
         engine="text-davinci-003",
-        prompt= "You are, "+bot+", a clinical bedside virtual intelligent assistant (VIA) at Trinity University Hospital for a patient named "+patient+". Speak to "+patient+" only in "+primaryLanguage+" with patience, empathy, and assurance. Kindly instruct the patient to press their nurse call button on their TV remote when needed.\n\n"+chart+context+"\n"+patient+": "+zice+"\n"+bot+":",
-        #prompt= "You are, "+bot+", a clinical bedside virtual intelligent assistant (VIA) at Trinity University Hospital for a patient named "+patient+". Kindly instruct the patient to press their nurse call button on their TV remote when needed.\n\n"+chart+context+"\n"+patient+": "+zice+"\n"+bot+":",
+        prompt= "You are, "+bot+", a clinical bedside intelligent virtual assistant (IVA) at Trinity University Hospital for a patient named "+patient+". Speak to "+patient+" only in "+primaryLanguage+" with patience, empathy, and assurance. Keep the patient company and have conversations with them.\n\n"+chart+context+"\n"+patient+": "+zice+"\n"+bot+":",
+        #prompt= "You are, "+bot+", a clinical bedside intelligent virtual assistant (IVA) at Trinity University Hospital for a patient named "+patient+". Speak to "+patient+" only in "+primaryLanguage+" with patience, empathy, and assurance. Keep the patient company and have conversations with them. Kindly instruct the patient to press their nurse call button on their TV remote when needed.\n\n"+chart+context+"\n"+patient+": "+zice+"\n"+bot+":",
         temperature=0.7,
         max_tokens=256,
         top_p=1.0,
@@ -252,9 +259,47 @@ def chat_gpt3(zice):
         decoded_text = encoded_text.decode('utf-8')
         completion_text += decoded_text  # append the text
         print(decoded_text, end="")  # print the delay and text
-        
+    
+    # print response time
     print(f" [{responseTime:.2f} S]\n")
+    
+    # take out commands
+    completion_text = parse_command(completion_text)
+    
+    # runs if commands are present
+    if currentRequests: run_command()
+        
     return completion_text
+
+def parse_command(text):
+    
+    global currentRequests
+    
+    # strips tts text of commands
+    textClean = re.sub(r'\[.*?\]', '', text)
+    
+    # compile regular expression pattern to match contents of brackets '[]'
+    pattern = re.compile(r'\[(.*?)\]')
+    
+    # find all occurrences of pattern in string and save as list
+    currentRequests = pattern.findall(text)
+    
+    return textClean
+
+def run_command():
+    
+    global currentRequests
+    
+    requestSplit = currentRequests[0].split(": ")
+    
+    command = requestSplit[0].upper()
+    reason = requestSplit[1].upper()
+    
+    match command:
+        case "NURSE CALL":
+            playsound('call.wav', False)
+            print(f"\n[{timeCurrent}] {command}: {reason}\n")
+            
 
 # inputs response SSML from CHAT_GPT()
 # streams async synthesis
@@ -282,7 +327,7 @@ def respond(prompt, response):
     xmlns:mstts="https://www.w3.org/2001/mstts" xml:lang="en-US">
     <voice name="'''+voice+'''">
     <prosody rate="medium">
-    <mstts:express-as style="Friendly" styledegree="2">
+    <mstts:express-as style="'''+style+'''" styledegree="2">
     '''+ response +'''
     </mstts:express-as>
     </prosody>

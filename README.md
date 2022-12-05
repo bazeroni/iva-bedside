@@ -1,12 +1,27 @@
-# synia-s2s
+# iva-bedside
 
-*Synia-s2s (speech2speech): Vocalized Conversational AI*
+*iva-bedside (intelligent virtual assistant)* is a response to chronic and severe staffing issues in the nursing industry.
 
-### Abstract
-Synia-s2s is a conversational AI chatbot that you can talk to with your voice, and it will talk back. Synia-s2s is a continuation of Synia-t2t (text2text).
+A patient is 7% more likely to die for every additional patient their nurse has to care for. *(The Lancet, 2014)*
 
-### Usage
-There are a wide variety of uses that are still being explored in an appropriate scope. The goals with this project was to take the amazing results from Synia-t2t and recreate it in a more natural and believable medium just like a human conversation.
+IVA allows nurses to focus on the most important tasks at hand so they can deliver the best care possible.
 
-### Limitations
-There are many nuances to human conversation that could not be replicated with the same accuracy with a chatbot, but are being worked on and continue to become more comparable every day.
+## Abstract
+IVA is a multilingual, voice-controlled AI assistant for clinical inpatient settings. IVA utilizes patient medical charts to assist accurately and in context per case. Additionally, IVA can recognize and initiate commands from natural language.
+
+## Usage
+IVA provides low-level support for patients, covering a wide range of tasks that can be safely automated. Tasks that cannot be automated safely are recognized and passed safely through IVA as requests to human clinical staff.
+
+## Limitations
+There are many nuances to human conversation that cannot be replicated with the same accuracy with a voice assistant. IVA does not provide the same level or type of support as humans, and therefore does not replace human clinical staff.
+
+## Utilities
+Leverages OpenAI's GPT-3 for natural language and Microsoft Azure for STT + TTS
+
+## Examples
+
+>**Patient:** "I need help getting out of bed."  
+>**IVA:** "Hi. I'll call someone to help you get out of bed right away. **\[FALL RISK REQUEST\]**"
+
+>**Patient:** "I'm hungry."  
+>**IVA:** "Ok. I'll have someone bring you a menu. **\[MEAL REQUEST\]**"
