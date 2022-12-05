@@ -21,7 +21,7 @@ speech_config = speechsdk.SpeechConfig(subscription=AZURE_SPEECH_KEY, region="ea
 
 ## STT LANGUAGES ##
 
-#speech_config.speech_recognition_language="en-US"
+speech_config.speech_recognition_language="en-US"
 
 #speech_config.speech_recognition_language="es-US"
 #speech_config.speech_recognition_language="es-MX"
@@ -49,13 +49,15 @@ speech_config = speechsdk.SpeechConfig(subscription=AZURE_SPEECH_KEY, region="ea
 
 #speech_config.speech_recognition_language="fil-PH"
 
+#speech_config.speech_recognition_language="ja-JP"
+
 ## TTS LANGUAGES ##
 # other than Aria, style compatible (-empathetic) with Davis, Guy, Jane, Jason, Jenny, Nancy, Tony
 
 style = "Friendly"
 
 # ENGLISH #
-#speech_config.speech_synthesis_voice_name='en-US-NancyNeural'
+speech_config.speech_synthesis_voice_name='en-US-NancyNeural'
 #speech_config.speech_synthesis_voice_name='en-US-JennyNeural'
 #speech_config.speech_synthesis_voice_name='en-US-AriaNeural'
 #speech_config.speech_synthesis_voice_name='en-US-JennyMultilingualNeural'
@@ -94,6 +96,9 @@ style = "Friendly"
 
 # TAGALOG #
 #speech_config.speech_synthesis_voice_name='fil-PH-BlessicaNeural'
+
+# JAPANESE #
+#speech_config.speech_synthesis_voice_name='ja-JP-MayuNeural'
 
 # sets voice
 voice = speech_config.speech_synthesis_voice_name
@@ -311,6 +316,10 @@ def run_command():
         case "FLUID REQUEST":
             playsound('call.wav', False)
             print(f"\n[{timeCurrent}] {command}: {parameter}\n")
+        case default:
+            playsound('call.wav', False)
+            print(f"\n[{timeCurrent}] {command}: {parameter}\n")
+        
 
 # inputs response SSML from CHAT_GPT()
 # streams async synthesis
