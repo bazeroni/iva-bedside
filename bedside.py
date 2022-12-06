@@ -205,16 +205,6 @@ context = ""
 messages = []
 silenceCount = 0
 
-# Define a callback function that will be called
-# whenever a key is pressed
-def on_key_press(key):
-    # Print the character that was pressed
-    print("You pressed: ", key.name)
-
-    input = input(patient + ": ")
-
-    think(input)
-
 def concatenate_context():
     
     global messages
