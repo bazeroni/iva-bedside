@@ -155,7 +155,7 @@ def get_chart():
         compact=False,
     )
 
-    chars_to_remove = ["'"]
+    chars_to_remove = ["'", "{", "}", "[", "]"]
     for char in chars_to_remove:
         patient_formatted = patient_formatted.replace(char, "")
         
@@ -186,7 +186,7 @@ def chat_gpt3(zice):
     start_time = time.time()
     response = openai.Completion.create(
         engine="text-davinci-003",
-        prompt= "You are, "+bot+", a clinical bedside intelligent virtual assistant at Trinity University Hospital for a patient named "+patient+". Speak to "+patient+" only in "+primary_language+" colloquially with patience, compassion, empathy, and assurance. The patient should be relaxed by you and the conversations you have with them. For each request that "+patient+" needs, alert the care team by inserting the exact command and it's details to replace between brackets within a message.\n\n"+chart++context+"\n"+patient+": "+zice+"\n"+bot+":",
+        prompt= "You are, "+bot+", a bedside medical assistant at Trinity University Hospital for a patient named "+patient+". Speak to "+patient+" only in "+primary_language+" colloquially with patience, compassion, empathy, and assurance. The patient should be relaxed, not overwhelmed, by you and the conversations you have with them. For each request that "+patient+" needs that falls under the COMMANDS list below, alert the care team by inserting the exact command and it's details to replace between brackets within a message.\n\n----------------MEDICAL CHART-------------------\n\n"+chart+"\n\n----------------COMMANDS-------------------\n\n[BED ASSIST: (DETAILS TO REPLACE)]\n[BATHROOM ASSIST: (DETAILS TO REPLACE)]\n[DRESS ASSIST: (DETAILS TO REPLACE)]\n[PAIN REQUEST: (DETAILS TO REPLACE)]\n[FOOD REQUEST: (DETAILS TO REPLACE)]\n[FLUID REQUEST: (DETAILS TO REPLACE)]\n[NURSE CALL: (DETAILS TO REPLACE)]\n\n----------------START OF CHAT-------------------\n"+context+"\n"+patient+": "+zice+"\n"+bot+":",
         #prompt= "You are, "+bot+", a clinical bedside intelligent virtual assistant (IVA) at Trinity University Hospital for a patient named "+patient+". Speak to "+patient+" only in "+language_primary+" with patience, empathy, and assurance. Keep the patient company and have conversations with them. Kindly instruct the patient to press their nurse call button on their TV remote when needed.\n\n"+chart+context+"\n"+patient+": "+zice+"\n"+bot+":",
         temperature=0.7,
         max_tokens=256,
@@ -194,7 +194,7 @@ def chat_gpt3(zice):
         frequency_penalty=2.0,
         presence_penalty=2.0,
         stop=[patient+":", bot+":"],
-        echo=True,
+        echo=False,
         stream=True,
     )
     response_time = time.time() - start_time
@@ -206,7 +206,6 @@ def chat_gpt3(zice):
     
     # iterate through the stream of events
     for event in response:
-        event_time = time.time() - start_time  # calculate the time delay of the event
         collected_events.append(event)  # save the event response
         event_text = event['choices'][0]['text']  # extract the text
         # Encode the string using the utf-8 codec
@@ -293,7 +292,7 @@ def respond(prompt, response):
     response = parse_command(response)
     
     # runs if commands are present
-    if current_requests: run_command()
+    if len(current_requests) == 1: run_command()
 
     # concats message to memory/history
     concatenate_context()
@@ -375,20 +374,25 @@ def listen():
     
     # listens for speech
     while True:
-
-        playsound('start.mp3', False)
         
-        listeningAnimation()
-        
-        speech_recognition_result = recognize()
-        
-        playsound('stop.mp3', False)
+        try:
 
-        # gets tts from azure stt
-        speech_recognizer.recognized.connect(think(speech_recognition_result.text))
+            playsound('start.mp3', False)
+            
+            listeningAnimation()
+            
+            speech_recognition_result = recognize()
+            
+            playsound('stop.mp3', False)
 
-        #message = input(patient + ": ")
-        #think(message)
+            # gets tts from azure stt
+            speech_recognizer.recognized.connect(think(speech_recognition_result.text))
+
+            #message = input(patient + ": ")
+            #think(message)
+        
+        except SystemError:
+            print("keystroke exit")
         
 def wait_for_key(key):
     

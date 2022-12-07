@@ -1,0 +1,4 @@
+lst = [1]
+
+if lst:
+    print(True)
