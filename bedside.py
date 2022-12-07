@@ -9,6 +9,7 @@ import azure.cognitiveservices.speech as speechsdk
 from pprint import pformat
 from dotenv import load_dotenv
 from playsound import playsound
+from voice import tts_voice, stt_language
 
 # loads env variables file
 load_dotenv()
@@ -22,88 +23,6 @@ openai.api_key=OAI_API_KEY #OPEN AI INIT
 # configs tts
 speech_config = speechsdk.SpeechConfig(subscription=AZURE_SPEECH_KEY, region="eastus")
 
-## STT LANGUAGES ##
-
-speech_config.speech_recognition_language="en-US"
-
-#speech_config.speech_recognition_language="es-US"
-#speech_config.speech_recognition_language="es-MX"
-#speech_config.speech_recognition_language="es-PR"
-#speech_config.speech_recognition_language="es-DO"
-#speech_config.speech_recognition_language="es-SV"
-#speech_config.speech_recognition_language="es-CU"
-
-#speech_config.speech_recognition_language="yue-CN"
-#speech_config.speech_recognition_language="zh-CN"
-
-#speech_config.speech_recognition_language="vi-VN"
-
-#speech_config.speech_recognition_language="ru-RU"
-
-#speech_config.speech_recognition_language="ar-EG"
-#speech_config.speech_recognition_language="ar-SY"
-#speech_config.speech_recognition_language="ar-MA"
-
-#speech_config.speech_recognition_language="fr-FR"
-
-#speech_config.speech_recognition_language="km-KH"
-
-#speech_config.speech_recognition_language="it-IT"
-
-#speech_config.speech_recognition_language="fil-PH"
-
-#speech_config.speech_recognition_language="ja-JP"
-
-## TTS LANGUAGES ##
-# other than Aria, style compatible (-empathetic) with Davis, Guy, Jane, Jason, Jenny, Nancy, Tony
-
-# ENGLISH #
-#speech_config.speech_synthesis_voice_name='en-US-NancyNeural'
-#speech_config.speech_synthesis_voice_name='en-US-JennyNeural'
-speech_config.speech_synthesis_voice_name='en-US-AriaNeural'
-#speech_config.speech_synthesis_voice_name='en-US-JennyMultilingualNeural'
-
-# SPANISH #
-#speech_config.speech_synthesis_voice_name='es-US-PalomaNeural' # united states
-#speech_config.speech_synthesis_voice_name='es-MX-CarlotaNeural' # mexican
-#speech_config.speech_synthesis_voice_name='es-PR-KarinaNeural' # puerto rican
-#speech_config.speech_synthesis_voice_name='es-DO-RamonaNeural' # dominican
-#speech_config.speech_synthesis_voice_name='es-SV-LorenaNeural' # salvadorean
-#speech_config.speech_synthesis_voice_name='es-CU-BelkysNeural' # cuban
-
-# CHINESE #
-#speech_config.speech_synthesis_voice_name='yue-CN-XiaoMinNeural' # cantonese
-#speech_config.speech_synthesis_voice_name='zh-CN-XiaochenNeural' # mandarin
-
-# VIETNAMESE #
-#speech_config.speech_synthesis_voice_name='vi-VN-HoaiMyNeural'
-
-# RUSSIAN #
-#speech_config.speech_synthesis_voice_name='ru-RU-DariyaNeural'
-
-# ARABIC #
-#speech_config.speech_synthesis_voice_name='ar-EG-SalmaNeural' # egyptian
-#speech_config.speech_synthesis_voice_name='ar-SY-AmanyNeural' # syrian
-#speech_config.speech_synthesis_voice_name='ar-MA-MounaNeural' # moroccan
-
-# FRENCH #
-#speech_config.speech_synthesis_voice_name='fr-FR-BrigitteNeural'
-
-# KHMER #
-#speech_config.speech_synthesis_voice_name='km-KH-SreymomNeural'
-
-# ITALIAN #
-#speech_config.speech_synthesis_voice_name='it-IT-ElsaNeural'
-
-# TAGALOG #
-#speech_config.speech_synthesis_voice_name='fil-PH-BlessicaNeural'
-
-# JAPANESE #
-#speech_config.speech_synthesis_voice_name='ja-JP-MayuNeural'
-
-# sets voice
-voice = speech_config.speech_synthesis_voice_name
-
 # sets tts sample rate
 speech_config.set_speech_synthesis_output_format(speechsdk.SpeechSynthesisOutputFormat.Raw48Khz16BitMonoPcm)
 
@@ -113,8 +32,14 @@ tts_config = speechsdk.audio.AudioOutputConfig(use_default_speaker=True) # speak
 speech_recognizer = speechsdk.SpeechRecognizer(speech_config=speech_config, audio_config=stt_config) # inits stt
 speech_synthesizer = speechsdk.SpeechSynthesizer(speech_config=speech_config, audio_config=tts_config) # inits tts
 
-style = "hopeful" # ssml style for voice
-rate = "1.25" # speaking rate/speed
+speech_config.speech_recognition_language=stt_language
+speech_config.speech_synthesis_voice_name=tts_voice
+
+# sets voice
+voice = speech_config.speech_synthesis_voice_name
+
+style = "friendly" # ssml style for voice
+rate = "1.00" # speaking rate/speed
 # sets up identifiers for conversation
 bot = "Iva"
 patient = "Bash Gutierrez"
@@ -127,7 +52,7 @@ context = "" # concatenates message history for re-insertion with every prompt
 messages = [] # stores separate messages in list to be concatenated
 silence_count = 0 # counts number of no prompt
 current_requests = [] # stores recognized commands
-command_prompt = "\n\n----------------COMMANDS-------------------\n\n[BED ASSIST: (DETAILS TO REPLACE)]\n[BATHROOM ASSIST: (DETAILS TO REPLACE)]\n[DRESS ASSIST: (DETAILS TO REPLACE)]\n[PAIN REQUEST: (DETAILS TO REPLACE)]\n[FOOD REQUEST: (DETAILS TO REPLACE)]\n[FLUID REQUEST: (DETAILS TO REPLACE)]\n[NURSE CALL: (DETAILS TO REPLACE)]\n\n----------------START OF CHAT-------------------\n"
+command_prompt = "\n\n----------------COMMANDS-------------------\n\nFor each request that "+patient+" needs that falls under the COMMANDS list below, you alert the care team by inserting the exact command and it's details to replace between brackets within a message.\n\n[BED ASSIST: (DETAILS TO REPLACE)]\n[BATHROOM ASSIST: (DETAILS TO REPLACE)]\n[DRESS ASSIST: (DETAILS TO REPLACE)]\n[PAIN REQUEST: (DETAILS TO REPLACE)]\n[FOOD REQUEST: (DETAILS TO REPLACE)]\n[FLUID REQUEST: (DETAILS TO REPLACE)]\n[NURSE CALL: (DETAILS TO REPLACE)]"
 
 def get_chart():
     
@@ -142,29 +67,13 @@ def get_chart():
         chart_json = json.load(json_file)
     
     chart_json["CHART"]["LOCATION"]["datetime current"] = datetime.datetime.now().strftime("%m-%d-%Y %H:%M:%S")
+    chart_json["CHART"]["DEMOGRAPHICS"]["primary language"] = speech_config.speech_recognition_language
     
-    #chart_json = chart_json["CHART"]
-    
-    #print(chart_json)
-    
-    primary_language = chart_json["CHART"]["DEMOGRAPHICS"]["primary language"]
     time_current = chart_json["CHART"]["LOCATION"]["datetime current"]
-    print(time_current, primary_language)
-
-    patient_formatted = pformat(
-        chart_json,
-        indent=0,
-        width=80,
-        compact=False,
-    )
-
-    chars_to_remove = ["'", "{", "}", "[", "]"]
-    for char in chars_to_remove:
-        patient_formatted = patient_formatted.replace(char, "")
         
-    return patient_formatted
+    return chart_json
 
-chart = get_chart()
+chart = str(get_chart())
 
 def concatenate_context():
     
@@ -186,10 +95,10 @@ def chat_gpt3(zice):
     
     global chart
     
-    start_time = time.time()
+    #start_time = time.time()
     response = openai.Completion.create(
         engine="text-davinci-003",
-        prompt= "You are, "+bot+", a bedside medical assistant at Trinity University Hospital for a patient named "+patient+". Speak to "+patient+" only in "+primary_language+" colloquially with patience, compassion, empathy, and assurance. The patient should be relaxed, not overwhelmed, by you and the conversations you have with them. For each request that "+patient+" needs that falls under the COMMANDS list below, alert the care team by inserting the exact command and it's details to replace between brackets within a message.\n\n----------------MEDICAL CHART JSON-------------------\n\n"+str(chart_json)+command_prompt+"\n"+context+"\n"+patient+": "+zice+"\n"+bot+":",
+        prompt= "You are, "+bot+", a bedside medical assistant at Trinity University Hospital for a patient named "+patient+". Speak to "+patient+" only in "+primary_language+" colloquially with patience, compassion, empathy, and assurance. Keep the patient relaxed and informed. Explain things in understandable terms. For each request that "+patient+" needs that falls under the COMMANDS list below, you alert the care team by inserting the exact command and it's details to replace between brackets within a message.\n\n----------------MEDICAL CHART JSON-------------------\n\n"+chart+"\n\n----------------START OF CHAT-------------------\n\n"+context+"\n"+patient+": "+zice+"\n"+bot+":",
         #prompt= "You are, "+bot+", a clinical bedside intelligent virtual assistant (IVA) at Trinity University Hospital for a patient named "+patient+". Speak to "+patient+" only in "+language_primary+" with patience, empathy, and assurance. Keep the patient company and have conversations with them. Kindly instruct the patient to press their nurse call button on their TV remote when needed.\n\n"+chart+context+"\n"+patient+": "+zice+"\n"+bot+":",
         temperature=0.7,
         max_tokens=256,
@@ -200,7 +109,7 @@ def chat_gpt3(zice):
         echo=False,
         stream=True,
     )
-    response_time = time.time() - start_time
+    #response_time = time.time() - start_time
     
     # create variables to collect the stream of events
     collected_events = []
@@ -216,9 +125,10 @@ def chat_gpt3(zice):
         decoded_text = encoded_text.decode('utf-8')
         completion_text += decoded_text  # append the text
         print(decoded_text, end="")  # print the delay and text
-    
+        
+    print("\n")
     # print response time
-    print(f" [{response_time:.2f} S]\n")
+    #print(f" [{response_time:.2f} S]\n")
         
     return completion_text
 
@@ -271,34 +181,15 @@ def run_command():
         case default:
             playsound('call.wav', False)
             print(f"\n[{time_current}] {command}: {parameter}\n")
-        
-
-# inputs response SSML from CHAT_GPT()
-# streams async synthesis
-def tts(ssml):
-    
-    global speech_synthesis_result
-    
-    #speech_synthesis_result = speech_synthesizer.speak_ssml_async(ssml)
-    speech_synthesis_result = speech_synthesizer.speak_ssml_async(ssml).get()
 
 def respond(prompt, response):
     
     global messages
     global silence_count
     
-    response_formatted = f"{bot}:" + response
-
-    messages.append("\n"+prompt+"\n"+response_formatted)
-    
     # take out commands
-    response = parse_command(response)
-    
-    # runs if commands are present
-    if len(current_requests) == 1: run_command()
-
-    # concats message to memory/history
-    concatenate_context()
+    if "[" and "]" in response:
+        response = parse_command(response)
 
     # SSML for TTS with response and style
     xml_string = '''<speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis"
@@ -313,7 +204,15 @@ def respond(prompt, response):
     </speak>'''
 
     # synthesizes TTS with input SSML
-    tts(xml_string)
+    speech_synthesizer.speak_ssml_async(xml_string).get()
+
+    messages.append("\n"+prompt+"\n"+bot+": "+response)
+    
+    # runs if commands are present
+    if len(current_requests) == 1: run_command()
+
+    # concats message to memory/history
+    concatenate_context()
 
     # resets silence count to 0
     silence_count = 0

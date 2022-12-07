@@ -234,5 +234,15 @@
                 "West Chester Radiology"
             ],
             "daily message": "\"Hey this is RN Jane. Great job today! See you tomorrow\""
-        }
+        },
+
+        "COMMANDS": [
+            "[BED ASSIST: (DETAILS TO REPLACE)]",
+            "[BATHROOM ASSIST: (DETAILS TO REPLACE)]",
+            "[DRESS ASSIST: (DETAILS TO REPLACE)]",
+            "[PAIN REQUEST: (DETAILS TO REPLACE)]",
+            "[FOOD REQUEST: (DETAILS TO REPLACE)]",
+            "[FLUID REQUEST: (DETAILS TO REPLACE)]",
+            "[NURSE CALL: (DETAILS TO REPLACE)]]"
+        ]
     }
