@@ -6,7 +6,6 @@ import time
 import json
 import openai
 import azure.cognitiveservices.speech as speechsdk
-from pprint import pformat
 from dotenv import load_dotenv
 from playsound import playsound
 from voice import tts_voice, stt_language
@@ -84,9 +83,8 @@ def concatenate_context():
         messages.pop()
         
     #print(len(messages))
-        
-    for message in messages:
-        context += message
+    
+    context += "".join(messages)
 
 # inputs and reads patient prompt
 # responds with given style from TONE_GPT3()
