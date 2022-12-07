@@ -261,7 +261,7 @@ def listeningAnimation():
     listening = "||||||||||"
     
     for character in listening:
-        time.sleep(0.005)
+        time.sleep(0.0025)
         print(character, end="")
     
 def recognize():
