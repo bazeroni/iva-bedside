@@ -36,6 +36,7 @@ speech_config.speech_synthesis_voice_name=tts_voice
 
 # sets voice
 voice = speech_config.speech_synthesis_voice_name
+primary_language = speech_config.speech_recognition_language
 
 style = "friendly" # ssml style for voice
 rate = "1.00" # speaking rate/speed
@@ -45,7 +46,7 @@ patient = "Bash Gutierrez"
 # chart json
 chart_json = {}
 time_current = ""
-primary_language = "zh-CN"
+
 ### SETUP VARIABLES ###
 context = "" # concatenates message history for re-insertion with every prompt
 messages = [] # stores separate messages in list to be concatenated
@@ -189,7 +190,7 @@ def respond(prompt, response):
 
     # SSML for TTS with response and style
     xml_string = '''<speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis"
-    xmlns:mstts="https://www.w3.org/2001/mstts" xml:lang="'''+stt_language+'''">
+    xmlns:mstts="https://www.w3.org/2001/mstts" xml:lang="en-US">
     <voice name="'''+voice+'''">
     <prosody rate="'''+rate+'''">
     <mstts:express-as style="'''+style+'''" styledegree="2">
