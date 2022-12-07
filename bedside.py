@@ -127,6 +127,7 @@ context = "" # concatenates message history for re-insertion with every prompt
 messages = [] # stores separate messages in list to be concatenated
 silence_count = 0 # counts number of no prompt
 current_requests = [] # stores recognized commands
+command_prompt = "\n\n----------------COMMANDS-------------------\n\n[BED ASSIST: (DETAILS TO REPLACE)]\n[BATHROOM ASSIST: (DETAILS TO REPLACE)]\n[DRESS ASSIST: (DETAILS TO REPLACE)]\n[PAIN REQUEST: (DETAILS TO REPLACE)]\n[FOOD REQUEST: (DETAILS TO REPLACE)]\n[FLUID REQUEST: (DETAILS TO REPLACE)]\n[NURSE CALL: (DETAILS TO REPLACE)]\n\n----------------START OF CHAT-------------------\n"
 
 def get_chart():
     
@@ -139,13 +140,15 @@ def get_chart():
         
         # Load the data from the JSON file
         chart_json = json.load(json_file)
-
-    chart_json = chart_json["CHART"]
     
-    chart_json["LOCATION"]["datetime current"] = datetime.datetime.now().strftime("%m-%d-%Y %H:%M:%S")
+    chart_json["CHART"]["LOCATION"]["datetime current"] = datetime.datetime.now().strftime("%m-%d-%Y %H:%M:%S")
     
-    primary_language = chart_json["DEMOGRAPHICS"]["primary language"]
-    time_current = chart_json["LOCATION"]["datetime current"]
+    #chart_json = chart_json["CHART"]
+    
+    #print(chart_json)
+    
+    primary_language = chart_json["CHART"]["DEMOGRAPHICS"]["primary language"]
+    time_current = chart_json["CHART"]["LOCATION"]["datetime current"]
     print(time_current, primary_language)
 
     patient_formatted = pformat(
@@ -186,7 +189,7 @@ def chat_gpt3(zice):
     start_time = time.time()
     response = openai.Completion.create(
         engine="text-davinci-003",
-        prompt= "You are, "+bot+", a bedside medical assistant at Trinity University Hospital for a patient named "+patient+". Speak to "+patient+" only in "+primary_language+" colloquially with patience, compassion, empathy, and assurance. The patient should be relaxed, not overwhelmed, by you and the conversations you have with them. For each request that "+patient+" needs that falls under the COMMANDS list below, alert the care team by inserting the exact command and it's details to replace between brackets within a message.\n\n----------------MEDICAL CHART-------------------\n\n"+chart+"\n\n----------------COMMANDS-------------------\n\n[BED ASSIST: (DETAILS TO REPLACE)]\n[BATHROOM ASSIST: (DETAILS TO REPLACE)]\n[DRESS ASSIST: (DETAILS TO REPLACE)]\n[PAIN REQUEST: (DETAILS TO REPLACE)]\n[FOOD REQUEST: (DETAILS TO REPLACE)]\n[FLUID REQUEST: (DETAILS TO REPLACE)]\n[NURSE CALL: (DETAILS TO REPLACE)]\n\n----------------START OF CHAT-------------------\n"+context+"\n"+patient+": "+zice+"\n"+bot+":",
+        prompt= "You are, "+bot+", a bedside medical assistant at Trinity University Hospital for a patient named "+patient+". Speak to "+patient+" only in "+primary_language+" colloquially with patience, compassion, empathy, and assurance. The patient should be relaxed, not overwhelmed, by you and the conversations you have with them. For each request that "+patient+" needs that falls under the COMMANDS list below, alert the care team by inserting the exact command and it's details to replace between brackets within a message.\n\n----------------MEDICAL CHART JSON-------------------\n\n"+str(chart_json)+command_prompt+"\n"+context+"\n"+patient+": "+zice+"\n"+bot+":",
         #prompt= "You are, "+bot+", a clinical bedside intelligent virtual assistant (IVA) at Trinity University Hospital for a patient named "+patient+". Speak to "+patient+" only in "+language_primary+" with patience, empathy, and assurance. Keep the patient company and have conversations with them. Kindly instruct the patient to press their nurse call button on their TV remote when needed.\n\n"+chart+context+"\n"+patient+": "+zice+"\n"+bot+":",
         temperature=0.7,
         max_tokens=256,

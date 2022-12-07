@@ -7,7 +7,9 @@ with open('patient.json') as json_file:
     # Load the data from the JSON file
     patient = json.load(json_file)
 
-patient = patient["CHART"]
+patient = patient
+
+print(patient)
 
 patient_formatted = pformat(
     patient,
@@ -16,8 +18,8 @@ patient_formatted = pformat(
     compact=False,
 )
 
-chars_to_remove = ["'"]
+chars_to_remove = ["'", "{", "}", "[", "]"]
 for char in chars_to_remove:
     patient_formatted = patient_formatted.replace(char, "")
 
-print(patient_formatted)
+#print(patient_formatted)
