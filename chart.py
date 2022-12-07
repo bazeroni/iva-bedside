@@ -16,7 +16,6 @@ patient_formatted = pformat(
     compact=False,
 )
 
-
 chars_to_remove = ["'"]
 for char in chars_to_remove:
     patient_formatted = patient_formatted.replace(char, "")

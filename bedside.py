@@ -1,6 +1,7 @@
 import keyboard
 import os
 import re
+import datetime
 import time
 import json
 import openai
@@ -114,107 +115,53 @@ speech_synthesizer = speechsdk.SpeechSynthesizer(speech_config=speech_config, au
 
 style = "hopeful" # ssml style for voice
 rate = "1.25" # speaking rate/speed
-
 # sets up identifiers for conversation
 bot = "Iva"
 patient = "Bash Gutierrez"
-
-### bedside variables ###
-
-## basic info
-dob = "03-22-95"
-age = "27"
-weight = "63 kg"
-height = "180.3 cm"
-address_street = "2744 Mifflin St"
-address_city = "Philadelphia"
-address_state = "PA"
-zipcode = "19145"
-phone = "215-301-1665"
-language_primary = speech_config.speech_recognition_language
-
-## case info
-#date_current = "11-30-22"
-#time_current = "12:23 AM"
-zone = "Tioga Pavilion (Zone A)"
-floor = "3 West"
-room_number = "A-315"
-#room_temperature = "73.4 F (Only patient/nurse adjustable through button on TV remote)"
-date_admitted = "11-22-22"
-date_discharge = "12-10-22"
-
-## vitals
-blood_pressure = "125/90 mmHg"
-pulse = "77 bpm"
-temperature = "97.9 F"
-respiratory_rate = "16 breaths/min"
-oxygen_saturation = "96%"
-
-## precautions
-last_pain_med = "11-29-22 07:15 AM"
-next_pain_med = "11-30-22 07:15 AM"
-restrict_mobility = "Yes, bed rest"
-restrict_fluid = "Yes, fluid restriction, please see nurse"
-restrict_diet = "Yes, nothing by mouth after midnight (NPO)"
-fall_risk = "Yes, call for assistance"
-isolation = "Yes, visitors must follow isolation instructions"
-covid = "Negative"
-
-## previous medical history
-conditions = ""
-surgeries = ""
-hospitalizations = ""
-
-## allergies
-allergies = "-Peanut\n-Shellfish\n-Penicillin"
-
-## medications
-medications = "-Amoxicillin\n-Ibuprofen"
-
-## test results
-blood_work = ""
-imaging_scans = ""
-diagnostic_tests = ""
-
-## reason for admission
-admission_reason = "-Suspected pneumonia"
-
-## assessment
-assessment = "-Chest X-ray shows infiltrates in the lower lobes of the lungs\n-Cough with yellow sputum production\n-Shortness of breath"
-
-## treatment plan
-treatment_plan = "-Administer intravenous antibiotics\n-Administer oxygen therapy\n-Monitor vital signs and oxygen saturation levels\n-Encourage deep breathing and coughing exercises"
-
-## follow-up
-follow_up = "-Repeat chest X-ray in 48 hours\n-Consult with pulmonologist for further management"
-
-## discharge plan
-discharge_plan = "-Prescribe oral antibiotics for 7-10 days\n-Follow up with primary care physician in 1 week\n-Recommend influenza vaccine to prevent future respiratory infections"
-
-## care team
-attending_provider = "Dr. Jacksonville"
-pulmonologist = "Dr. Washington"
-respiratory_therapist = "Sandra"
-physical_therapist = "Mary"
-nurse_practitioner = "Dietra"
-registered_nurse = "Maureen"
-nurse_assistant = "David"
-
-## agenda
-goals = "-Rest\n-Coughing Exercises\n-Family Meeting AM"
-events = "Morning: Radiology\nAfternoon: Pulmonologist"
-consults = "-West Chester Radiology"
-daily_message = "-\"Hey this is RN Jane. Great job today! See you tomorrow\""
-
-## Compiled Chart ##
-
-chart = f"----------------MEDICAL CHART-------------------\n\nPatient: {patient}\nDate of Birth: {dob}\nAge: {age}\nWeight: {weight}\nHeight: {height}\nPatient IANA Language Code: {language_primary}\n\nCurrent Date: {date_current}\nCurrent Time: {time_current}\nZone: {zone}\nFloor: {floor}\nRoom: {room_number}\nRoom Temperature: {room_temperature}\nDate Admitted: {date_admitted}\nExpected Discharge Date: {date_discharge}\n\nALLERGIES\n{allergies}\n\nMEDICATIONS\n{medications}\n\nREASON FOR ADMISSION\n{admission_reason}\n\nASSESSMENT\n{assessment}\n\nTREATMENT PLAN\n{treatment_plan}\n\nFOLLOW-UP\n{follow_up}\n\nDISCHARGE PLAN\n{discharge_plan}\n\nCONDITIONS AND PRECAUTIONS\nLast Pain Medication: {last_pain_med}\nNext Pain Medication: {next_pain_med}\nMobility Restriction: {restrict_mobility}\nFluid Restriction: {restrict_fluid}\nDiet Restriction: {restrict_diet}\nFall Risk: {fall_risk}\nIsolation: {isolation}\n\nVITALS\nBP: {blood_pressure}\nHR: {pulse}\nRR: {respiratory_rate}\nTemp: {temperature}\nO2: {oxygen_saturation}\n\nCARE TEAM\nAttending Provider: {attending_provider}\nPulmonologist: {pulmonologist}\nRespiratory Therapist: {respiratory_therapist}\nPhysical Therapist: {physical_therapist}\nNurse Practitioner: {nurse_practitioner}\nRegistered Nurse: {registered_nurse}\nNurse Assistant: {nurse_assistant}\n\nGOALS / PLAN FOR THE DAY\n{goals}\n\nUPCOMING EVENTS\n{events}\n\nUPCOMING CONSULTS\n{consults}\n\nPREVIOUS SHIFT MESSAGES TO PATIENT\n{daily_message}\n\n----------------COMMANDS-------------------\n\nFor each request that "+patient+" needs, alert the care team by inserting the exact matching command and it's details to replace between brackets within a message.\n\n[BED ASSIST: (DETAILS TO REPLACE)]\n[BATHROOM ASSIST: (DETAILS TO REPLACE)]\n[DRESS ASSIST: (DETAILS TO REPLACE)]\n[PAIN REQUEST: (DETAILS TO REPLACE)]\n[FOOD REQUEST: (DETAILS TO REPLACE)]\n[FLUID REQUEST: (DETAILS TO REPLACE)]\n[NURSE CALL: (DETAILS TO REPLACE)]\n\n----------------START OF CHAT-------------------\n"
-
+# chart json
+chart_json = {}
+time_current = ""
+primary_language = ""
 ### SETUP VARIABLES ###
 context = "" # concatenates message history for re-insertion with every prompt
 messages = [] # stores separate messages in list to be concatenated
 silence_count = 0 # counts number of no prompt
 current_requests = [] # stores recognized commands
+
+def get_chart():
+    
+    global chart_json
+    global time_current
+    global primary_language
+    
+    # Open the JSON file
+    with open('patient.json') as json_file:
+        
+        # Load the data from the JSON file
+        chart_json = json.load(json_file)
+
+    chart_json = chart_json["CHART"]
+    
+    chart_json["LOCATION"]["datetime current"] = datetime.datetime.now().strftime("%m-%d-%Y %H:%M:%S")
+    
+    primary_language = chart_json["DEMOGRAPHICS"]["primary language"]
+    time_current = chart_json["LOCATION"]["datetime current"]
+    print(time_current, primary_language)
+
+    patient_formatted = pformat(
+        chart_json,
+        indent=0,
+        width=80,
+        compact=False,
+    )
+
+    chars_to_remove = ["'"]
+    for char in chars_to_remove:
+        patient_formatted = patient_formatted.replace(char, "")
+        
+    return patient_formatted
+
+chart = get_chart()
 
 def concatenate_context():
     
@@ -234,10 +181,12 @@ def concatenate_context():
 # returns response
 def chat_gpt3(zice):
     
+    global chart
+    
     start_time = time.time()
     response = openai.Completion.create(
         engine="text-davinci-003",
-        prompt= "You are, "+bot+", a clinical bedside intelligent virtual assistant at Trinity University Hospital for a patient named "+patient+". Speak to "+patient+" only in "+language_primary+" colloquially with patience, compassion, empathy, and assurance. The patient should be relaxed by you and the conversations you have with them. For each request that "+patient+" needs, alert the care team by inserting the exact command and it's details to replace between brackets within a message.\n\n"+chart+context+"\n"+patient+": "+zice+"\n"+bot+":",
+        prompt= "You are, "+bot+", a clinical bedside intelligent virtual assistant at Trinity University Hospital for a patient named "+patient+". Speak to "+patient+" only in "+primary_language+" colloquially with patience, compassion, empathy, and assurance. The patient should be relaxed by you and the conversations you have with them. For each request that "+patient+" needs, alert the care team by inserting the exact command and it's details to replace between brackets within a message.\n\n"+chart++context+"\n"+patient+": "+zice+"\n"+bot+":",
         #prompt= "You are, "+bot+", a clinical bedside intelligent virtual assistant (IVA) at Trinity University Hospital for a patient named "+patient+". Speak to "+patient+" only in "+language_primary+" with patience, empathy, and assurance. Keep the patient company and have conversations with them. Kindly instruct the patient to press their nurse call button on their TV remote when needed.\n\n"+chart+context+"\n"+patient+": "+zice+"\n"+bot+":",
         temperature=0.7,
         max_tokens=256,
@@ -245,7 +194,7 @@ def chat_gpt3(zice):
         frequency_penalty=2.0,
         presence_penalty=2.0,
         stop=[patient+":", bot+":"],
-        echo=False,
+        echo=True,
         stream=True,
     )
     response_time = time.time() - start_time
