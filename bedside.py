@@ -31,7 +31,7 @@ tts_config = speechsdk.audio.AudioOutputConfig(use_default_speaker=True) # speak
 speech_recognizer = speechsdk.SpeechRecognizer(speech_config=speech_config, audio_config=stt_config) # inits stt
 speech_synthesizer = speechsdk.SpeechSynthesizer(speech_config=speech_config, audio_config=tts_config) # inits tts
 
-speech_config.speech_recognition_language=stt_language
+speech_config.speech_recognition_language="zh-CN"
 speech_config.speech_synthesis_voice_name=tts_voice
 
 # sets voice
@@ -45,7 +45,7 @@ patient = "Bash Gutierrez"
 # chart json
 chart_json = {}
 time_current = ""
-primary_language = ""
+primary_language = "zh-CN"
 ### SETUP VARIABLES ###
 context = "" # concatenates message history for re-insertion with every prompt
 messages = [] # stores separate messages in list to be concatenated
@@ -66,8 +66,8 @@ def get_chart():
         chart_json = json.load(json_file)
     
     chart_json["CHART"]["LOCATION"]["datetime current"] = datetime.datetime.now().strftime("%m-%d-%Y %H:%M:%S")
-    chart_json["CHART"]["DEMOGRAPHICS"]["primary language"] = speech_config.speech_recognition_language
     
+    chart_json["CHART"]["DEMOGRAPHICS"]["primary language"] = primary_language
     time_current = chart_json["CHART"]["LOCATION"]["datetime current"]
         
     return chart_json
@@ -119,10 +119,8 @@ def chat_gpt3(zice):
         collected_events.append(event)  # save the event response
         event_text = event['choices'][0]['text']  # extract the text
         # Encode the string using the utf-8 codec
-        encoded_text = event_text.encode('utf-8')
-        decoded_text = encoded_text.decode('utf-8')
-        completion_text += decoded_text  # append the text
-        print(decoded_text, end="")  # print the delay and text
+        completion_text += event_text  # append the text
+        print(event_text, end="")  # print the delay and text
         
     print("\n")
     # print response time
@@ -191,7 +189,7 @@ def respond(prompt, response):
 
     # SSML for TTS with response and style
     xml_string = '''<speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis"
-    xmlns:mstts="https://www.w3.org/2001/mstts" xml:lang="en-US">
+    xmlns:mstts="https://www.w3.org/2001/mstts" xml:lang="'''+stt_language+'''">
     <voice name="'''+voice+'''">
     <prosody rate="'''+rate+'''">
     <mstts:express-as style="'''+style+'''" styledegree="2">
