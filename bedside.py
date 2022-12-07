@@ -134,12 +134,12 @@ phone = "215-301-1665"
 language_primary = speech_config.speech_recognition_language
 
 ## case info
-#date_current = "11-30-22"
-#time_current = "12:23 AM"
+date_current = "11-30-22"
+time_current = "12:23 AM"
 zone = "Tioga Pavilion (Zone A)"
 floor = "3 West"
 room_number = "A-315"
-#room_temperature = "73.4 F (Only patient/nurse adjustable through button on TV remote)"
+room_temperature = "73.4 F (Only patient/nurse adjustable through button on TV remote)"
 date_admitted = "11-22-22"
 date_discharge = "12-10-22"
 
