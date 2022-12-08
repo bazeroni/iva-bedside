@@ -25,18 +25,18 @@ speech_config = speechsdk.SpeechConfig(subscription=AZURE_SPEECH_KEY, region="ea
 # sets tts sample rate
 speech_config.set_speech_synthesis_output_format(speechsdk.SpeechSynthesisOutputFormat.Raw48Khz16BitMonoPcm)
 
-stt_config = speechsdk.audio.AudioConfig(use_default_microphone=True) # microphone device stt # stream from here?
-tts_config = speechsdk.audio.AudioOutputConfig(use_default_speaker=True) # speaker device tts
-
-speech_recognizer = speechsdk.SpeechRecognizer(speech_config=speech_config, audio_config=stt_config, language=stt_language ) # inits stt
-speech_synthesizer = speechsdk.SpeechSynthesizer(speech_config=speech_config, audio_config=tts_config) # inits tts
-
 speech_config.speech_recognition_language=stt_language
 speech_config.speech_synthesis_voice_name=tts_voice
 
 # sets voice
 voice = speech_config.speech_synthesis_voice_name
 primary_language = speech_config.speech_recognition_language
+
+stt_config = speechsdk.audio.AudioConfig(use_default_microphone=True) # microphone device stt # stream from here?
+tts_config = speechsdk.audio.AudioOutputConfig(use_default_speaker=True) # speaker device tts
+
+speech_recognizer = speechsdk.SpeechRecognizer(speech_config=speech_config, audio_config=stt_config, language=stt_language) # inits stt
+speech_synthesizer = speechsdk.SpeechSynthesizer(speech_config=speech_config, audio_config=tts_config) # inits tts
 
 style = "friendly" # ssml style for voice
 rate = "1.00" # speaking rate/speed
@@ -52,7 +52,7 @@ context = "" # concatenates message history for re-insertion with every prompt
 messages = [] # stores separate messages in list to be concatenated
 silence_count = 0 # counts number of no prompt
 current_requests = [] # stores recognized commands
-command_prompt = "\n\n----------------COMMANDS-------------------\n\nFor each request that "+patient+" needs that falls under the COMMANDS list below, you alert the care team by inserting the exact command and it's details to replace between brackets within a message.\n\n[BED ASSIST: (DETAILS TO REPLACE)]\n[BATHROOM ASSIST: (DETAILS TO REPLACE)]\n[DRESS ASSIST: (DETAILS TO REPLACE)]\n[PAIN REQUEST: (DETAILS TO REPLACE)]\n[FOOD REQUEST: (DETAILS TO REPLACE)]\n[FLUID REQUEST: (DETAILS TO REPLACE)]\n[NURSE CALL: (DETAILS TO REPLACE)]"
+command_prompt = "\n\n----------------COMMANDS-------------------\n\nFor each request that "+patient+" needs that falls under the COMMANDS list below, you alert the care team by inserting the exact command and it's details to replace between brackets within a message.\n\n[BED ASSIST: (DETAILS TO REPLACE)]\n[BATHROOM ASSIST: (DETAILS TO REPLACE)]\n[DRESS ASSIST: (DETAILS TO REPLACE)]\n[PAIN REQUEST: (DETAILS TO REPLACE)]\n[FOOD REQUEST: (DETAILS TO REPLACE)]\n[FLUID REQUEST: (DETAILS TO REPLACE)]\n[NURSE CALL: (DETAILS TO REPLACE)]\n\n[CHANGE ROOM TEMPERATURE: (TEMPERATURE)]\n[LIGHT: (ON/OFF)]\n[PRIVACY FILTER: (ON/OFF)]"
 
 def get_chart():
     
@@ -175,6 +175,25 @@ def run_command():
         case "FLUID REQUEST":
             playsound('call.wav', False)
             print(f"\n[{time_current}] {command}: {parameter}\n")
+        case "CHANGE ROOM TEMPERATURE":
+            playsound('call.wav', False)
+            print(f"\n[{time_current}] {command}: {parameter}\n")
+        case "LIGHT":
+            match parameter:
+                case "NO":
+                    playsound('call.wav', False)
+                    print(f"\n[{time_current}] {command}: {parameter}\n")
+                case "YES":
+                    playsound('call.wav', False)
+                    print(f"\n[{time_current}] {command}: {parameter}\n")
+        case "PRIVACY FILTER":
+            match parameter:
+                case "NO":
+                    playsound('call.wav', False)
+                    print(f"\n[{time_current}] {command}: {parameter}\n")
+                case "YES":
+                    playsound('call.wav', False)
+                    print(f"\n[{time_current}] {command}: {parameter}\n")
         case default:
             playsound('call.wav', False)
             print(f"\n[{time_current}] {command}: {parameter}\n")
