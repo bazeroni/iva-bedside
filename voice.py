@@ -1,6 +1,6 @@
 ## STT LANGUAGES ##
 
-#stt_language="en-US"
+stt_language="en-US"
 
 #stt_language="es-US"
 #stt_language="es-MX"
@@ -10,7 +10,7 @@
 #stt_language="es-CU"
 
 #stt_language="yue-CN"
-stt_language="zh-CN"
+#stt_language="zh-CN"
 
 #stt_language="vi-VN"
 
@@ -36,7 +36,7 @@ stt_language="zh-CN"
 # ENGLISH #
 #tts_voice='en-US-NancyNeural'
 #tts_voice='en-US-JennyNeural'
-#tts_voice='en-US-AriaNeural'
+tts_voice='en-US-AriaNeural'
 #tts_voice='en-US-JennyMultilingualNeural'
 
 # SPANISH #
@@ -49,7 +49,7 @@ stt_language="zh-CN"
 
 # CHINESE #
 #tts_voice='yue-CN-XiaoMinNeural' # cantonese
-tts_voice='zh-CN-XiaochenNeural' # mandarin
+#tts_voice='zh-CN-XiaochenNeural' # mandarin
 
 # VIETNAMESE #
 #tts_voice='vi-VN-HoaiMyNeural'

@@ -25,13 +25,13 @@ speech_config = speechsdk.SpeechConfig(subscription=AZURE_SPEECH_KEY, region="ea
 # sets tts sample rate
 speech_config.set_speech_synthesis_output_format(speechsdk.SpeechSynthesisOutputFormat.Raw48Khz16BitMonoPcm)
 
-stt_config = speechsdk.audio.AudioConfig(use_default_microphone=True) # microphone device stt
+stt_config = speechsdk.audio.AudioConfig(use_default_microphone=True) # microphone device stt # stream from here?
 tts_config = speechsdk.audio.AudioOutputConfig(use_default_speaker=True) # speaker device tts
 
-speech_recognizer = speechsdk.SpeechRecognizer(speech_config=speech_config, audio_config=stt_config) # inits stt
+speech_recognizer = speechsdk.SpeechRecognizer(speech_config=speech_config, audio_config=stt_config, language=stt_language ) # inits stt
 speech_synthesizer = speechsdk.SpeechSynthesizer(speech_config=speech_config, audio_config=tts_config) # inits tts
 
-speech_config.speech_recognition_language="zh-CN"
+speech_config.speech_recognition_language=stt_language
 speech_config.speech_synthesis_voice_name=tts_voice
 
 # sets voice
@@ -97,7 +97,7 @@ def chat_gpt3(zice):
     #start_time = time.time()
     response = openai.Completion.create(
         engine="text-davinci-003",
-        prompt= "You are, "+bot+", a bedside medical assistant at Trinity University Hospital for a patient named "+patient+". Speak to "+patient+" only in "+primary_language+" colloquially with patience, compassion, empathy, and assurance. Keep the patient relaxed and informed. Explain things in understandable terms. For each request that "+patient+" needs that falls under the COMMANDS list below, you alert the care team by inserting the exact command and it's details to replace between brackets within a message.\n\n----------------MEDICAL CHART JSON-------------------\n\n"+chart+"\n\n----------------START OF CHAT-------------------\n\n"+context+"\n"+patient+": "+zice+"\n"+bot+":",
+        prompt= "You are, "+bot+", a bedside medical assistant at Trinity University Hospital for a patient named "+patient+". Speak to "+patient+" only in "+primary_language+" colloquially with patience, compassion, empathy, and assurance. Keep the patient relaxed and informed. Explain things in understandable terms. For each request that "+patient+" needs that falls under the COMMANDS list below, you alert the care team by inserting the exact command and it's details to replace between brackets within a message.\n\n----------------MEDICAL CHART JSON-------------------\n\n"+chart+command_prompt+"\n\n----------------START OF CHAT-------------------\n\n"+context+"\n"+patient+": "+zice+"\n"+bot+":",
         #prompt= "You are, "+bot+", a clinical bedside intelligent virtual assistant (IVA) at Trinity University Hospital for a patient named "+patient+". Speak to "+patient+" only in "+language_primary+" with patience, empathy, and assurance. Keep the patient company and have conversations with them. Kindly instruct the patient to press their nurse call button on their TV remote when needed.\n\n"+chart+context+"\n"+patient+": "+zice+"\n"+bot+":",
         temperature=0.7,
         max_tokens=256,
