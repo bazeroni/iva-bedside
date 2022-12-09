@@ -175,10 +175,12 @@ def respond(prompt, response):
     </prosody>
     </voice>
     </speak>'''
-
+    
+    global speech_synthesizer; speech_synthesizer = speechsdk.SpeechSynthesizer(speech_config=speech_config, audio_config=None) # inits tts
+    
     # synthesizes TTS with input SSML
     speech_synthesizer.speak_ssml_async(xml_string).get()
-
+    
     messages.append("\n"+prompt+"\n"+bot+": "+response)
     
     # runs if commands are present
@@ -301,11 +303,11 @@ def main():
     openai.api_key=OAI_API_KEY #OPEN AI INIT
 
     # configs tts
-    speech_config = speechsdk.SpeechConfig(subscription=AZURE_SPEECH_KEY, region="eastus")
+    global speech_config; speech_config = speechsdk.SpeechConfig(subscription=AZURE_SPEECH_KEY, region="eastus")
 
     # sets tts sample rate
     speech_config.set_speech_synthesis_output_format(speechsdk.SpeechSynthesisOutputFormat.Raw48Khz16BitMonoPcm)
-
+    
     global stt_language, tts_voice
     
     speech_config.speech_recognition_language=stt_language
@@ -316,14 +318,12 @@ def main():
     global primary_language; primary_language = speech_config.speech_recognition_language
     global languages; languages = ["en-US","zh-CN"]
 
-    language_config = speechsdk.AutoDetectSourceLanguageConfig(languages=languages)
-    stt_config = speechsdk.audio.AudioConfig(use_default_microphone=True) # microphone device stt # stream from here?
-    tts_config = speechsdk.audio.AudioOutputConfig(use_default_speaker=True) # speaker device tts
-
-    global speech_recognizer; speech_recognizer = speechsdk.SpeechRecognizer(speech_config=speech_config, audio_config=stt_config, auto_detect_source_language_config=language_config) # inits stt for auto multi detection languages
-    #global speech_recognizer; speech_recognizer = speechsdk.SpeechRecognizer(speech_config=speech_config, audio_config=stt_config, language=stt_language) # inits stt for one detection language
-
-    global speech_synthesizer; speech_synthesizer = speechsdk.SpeechSynthesizer(speech_config=speech_config, audio_config=tts_config) # inits tts
+    #language_config = speechsdk.AutoDetectSourceLanguageConfig(languages=languages)
+    global stt_config; stt_config = speechsdk.audio.AudioConfig(use_default_microphone=True) # microphone device stt # stream from here?
+    global tts_config; tts_config = speechsdk.audio.AudioOutputConfig(use_default_speaker=True) # speaker device tts
+    
+    #global speech_recognizer; speech_recognizer = speechsdk.SpeechRecognizer(speech_config=speech_config, audio_config=stt_config, auto_detect_source_language_config=language_config) # inits stt for auto multi detection languages
+    global speech_recognizer; speech_recognizer = speechsdk.SpeechRecognizer(speech_config=speech_config, audio_config=stt_config, language=stt_language) # inits stt for one detection language
     
     global style; style = "hopeful" # ssml style for voice
     global rate; rate = "1.15" # speaking rate/speed
