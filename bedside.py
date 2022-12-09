@@ -10,58 +10,9 @@ from dotenv import load_dotenv
 from playsound import playsound
 from voice import tts_voice, stt_language
 
-# loads env variables file
-load_dotenv()
-
-### AUTH KEYS ###
-
-AZURE_SPEECH_KEY = os.getenv("AZURE") #AZURE
-OAI_API_KEY = os.getenv("YOUR_API_KEY") #OPENAI
-openai.api_key=OAI_API_KEY #OPEN AI INIT
-
-# configs tts
-speech_config = speechsdk.SpeechConfig(subscription=AZURE_SPEECH_KEY, region="eastus")
-
-# sets tts sample rate
-speech_config.set_speech_synthesis_output_format(speechsdk.SpeechSynthesisOutputFormat.Raw48Khz16BitMonoPcm)
-
-speech_config.speech_recognition_language=stt_language
-speech_config.speech_synthesis_voice_name=tts_voice
-
-# sets voice
-voice = speech_config.speech_synthesis_voice_name
-primary_language = speech_config.speech_recognition_language
-
-#language_config = speechsdk.AutoDetectSourceLanguageConfig(languages=["en-US","es-US"])
-stt_config = speechsdk.audio.AudioConfig(use_default_microphone=True) # microphone device stt # stream from here?
-tts_config = speechsdk.audio.AudioOutputConfig(use_default_speaker=True) # speaker device tts
-
-#speech_recognizer = speechsdk.SpeechRecognizer(speech_config=speech_config, audio_config=stt_config, auto_detect_source_language_config=language_config) # inits stt for auto multi detection languages
-speech_recognizer = speechsdk.SpeechRecognizer(speech_config=speech_config, audio_config=stt_config, language=stt_language) # inits stt for one detection language
-
-speech_synthesizer = speechsdk.SpeechSynthesizer(speech_config=speech_config, audio_config=tts_config) # inits tts
-
-style = "hopeful" # ssml style for voice
-rate = "1.10" # speaking rate/speed
-# sets up identifiers for conversation
-bot = "Iva"
-patient = "Bash Gutierrez"
-# chart json
-chart_json = {}
-time_current = ""
-
-### SETUP VARIABLES ###
-context = "" # concatenates message history for re-insertion with every prompt
-messages = [] # stores separate messages in list to be concatenated
-silence_count = 0 # counts number of no prompt
-current_requests = [] # stores recognized commands
-command_prompt = "\n\n----------------COMMANDS-------------------\n\nWhen "+patient+" has a request or need that falls strictly under the COMMANDS list below, you alert the care team by inserting the exact command and it's parameter/reason between brackets within a message.\n\n[PATIENT REQUESTS NURSE: PARAMETER REASON]\n[BED ASSIST: PARAMETER REASON]\n[BATHROOM ASSIST: PARAMETER REASON]\n[DRESS ASSIST: PARAMETER REASON]\n[PAIN REQUEST: PARAMETER REASON]\n[FOOD REQUEST: PARAMETER REASON]\n[FLUID REQUEST: PARAMETER REASON]\n\n[CHANGE ROOM TEMPERATURE: TEMPERATURE]\n[LIGHT: ON/OFF]\n[PRIVACY FILTER: ON/OFF]"
-
 def get_chart():
     
     global chart_json
-    global time_current
-    global primary_language
     
     # Open the JSON file
     with open('patient.json') as json_file:
@@ -69,14 +20,11 @@ def get_chart():
         # Load the data from the JSON file
         chart_json = json.load(json_file)
     
-    chart_json["CHART"]["LOCATION"]["datetime current"] = datetime.datetime.now().strftime("%m-%d-%Y %H:%M:%S")
+    chart_json["CHART"]["LOCATION"]["datetime current"] = time_current
     
     chart_json["CHART"]["DEMOGRAPHICS"]["primary language"] = primary_language
-    time_current = chart_json["CHART"]["LOCATION"]["datetime current"]
         
     return chart_json
-
-chart = str(get_chart())
 
 def concatenate_context():
     
@@ -94,8 +42,6 @@ def concatenate_context():
 # responds with given style from TONE_GPT3()
 # returns response
 def chat_gpt3(zice):
-    
-    global chart
     
     #start_time = time.time()
     response = openai.Completion.create(
@@ -152,6 +98,7 @@ def run_command():
     global current_requests
     
     request_split = current_requests[0].split(":")
+    current_requests = []
     
     command = request_split[0].upper()
     parameter = request_split[1].upper()
@@ -255,7 +202,7 @@ def think(inp):
         
         # parses and formats patient input
         prompt = patient+": "+inp
-        print("\n\n"+prompt)
+        print(prompt+"\n")
         
         # gets GPT text message response completion
         response = chat_gpt3(inp)
@@ -270,7 +217,7 @@ def think(inp):
         
         # imitates silent input
         prompt = patient+": ..."
-        print("\n\n"+prompt)
+        print("\n\n", end="\r")
         
         # gets GPT text message response completion
         response = chat_gpt3("...")
@@ -284,40 +231,54 @@ def think(inp):
     
 def listeningAnimation():
     
-    listening = "||||||||||"
+    listening = "||||||||||||||||||||||||||||||||||||||||"
     
     for character in listening:
-        time.sleep(0.0025)
+        time.sleep(0.005)
         print(character, end="")
+
+    print("\r", end="\r")
+    
+    for letter in range(len(listening)):
+        time.sleep(0.005)
+        print(" ", end="")
+        
+    print("\r", end="\r")
     
 def recognize():
     
     # gets azure stt
-    speech_recognition_result = speech_recognizer.recognize_once_async().get()
-    #speech_recognizer.start_continuous_recognition_async()
+    done = False
+
+    def stop_cb(evt):
+        
+        print('CLOSING on {}'.format(evt))
+        speech_recognizer.stop_continuous_recognition_async()
+        nonlocal done
+        done = True
     
-    return speech_recognition_result
+    speech_recognizer.recognizing.connect(lambda evt: print(evt.result.text, end="\r"))
+    speech_recognizer.recognized.connect(lambda evt: think(evt.result.text))
+    speech_recognizer.session_started.connect(lambda evt: listeningAnimation())
+    speech_recognizer.session_stopped.connect(lambda evt: print('SESSION STOPPED {}'.format(evt)))
+    speech_recognizer.canceled.connect(lambda evt: print('CANCELED {}'.format(evt)))
+
+    speech_recognizer.session_stopped.connect(stop_cb)
+    speech_recognizer.canceled.connect(stop_cb)
+
+    speech_recognizer.start_continuous_recognition_async()
+    while not done:
+        time.sleep(.5)
     
 def listen():
     
     # listens for speech
     while True:
-        
+
         try:
 
             playsound('start.mp3', False)
-            
-            listeningAnimation()
-            
-            speech_recognition_result = recognize()
-            
-            playsound('stop.mp3', False)
-
-            # gets tts from azure stt
-            speech_recognizer.recognized.connect(think(speech_recognition_result.text))
-
-            #message = input(patient + ": ")
-            #think(message)
+            recognize()
         
         except SystemError:
             print("keystroke exit")
@@ -328,8 +289,62 @@ def wait_for_key(key):
         if keyboard.is_pressed(key):  # if key is pressed
             break  # finishing the loop
 
-print("\nVIA-Bedside\n\nWait for the |||||||||| command and sound cue before speaking.\n\nPress the space key to continue...\n")
+def main():
+    
+    # loads env variables file
+    load_dotenv()
+    
+    ### AUTH KEYS ###
 
-wait_for_key('space')
+    AZURE_SPEECH_KEY = os.getenv("AZURE") #AZURE
+    OAI_API_KEY = os.getenv("YOUR_API_KEY") #OPENAI
+    openai.api_key=OAI_API_KEY #OPEN AI INIT
 
-listen()
+    # configs tts
+    speech_config = speechsdk.SpeechConfig(subscription=AZURE_SPEECH_KEY, region="eastus")
+
+    # sets tts sample rate
+    speech_config.set_speech_synthesis_output_format(speechsdk.SpeechSynthesisOutputFormat.Raw48Khz16BitMonoPcm)
+
+    global stt_language, tts_voice
+    
+    speech_config.speech_recognition_language=stt_language
+    speech_config.speech_synthesis_voice_name=tts_voice
+
+    # sets voice
+    global voice; voice = speech_config.speech_synthesis_voice_name
+    global primary_language; primary_language = speech_config.speech_recognition_language
+    global languages; languages = ["en-US","zh-CN"]
+
+    language_config = speechsdk.AutoDetectSourceLanguageConfig(languages=languages)
+    stt_config = speechsdk.audio.AudioConfig(use_default_microphone=True) # microphone device stt # stream from here?
+    tts_config = speechsdk.audio.AudioOutputConfig(use_default_speaker=True) # speaker device tts
+
+    global speech_recognizer; speech_recognizer = speechsdk.SpeechRecognizer(speech_config=speech_config, audio_config=stt_config, auto_detect_source_language_config=language_config) # inits stt for auto multi detection languages
+    #global speech_recognizer; speech_recognizer = speechsdk.SpeechRecognizer(speech_config=speech_config, audio_config=stt_config, language=stt_language) # inits stt for one detection language
+
+    global speech_synthesizer; speech_synthesizer = speechsdk.SpeechSynthesizer(speech_config=speech_config, audio_config=tts_config) # inits tts
+    
+    global style; style = "hopeful" # ssml style for voice
+    global rate; rate = "1.15" # speaking rate/speed
+    # sets up identifiers for conversation
+    global bot; bot = "Iva"
+    global patient; patient = "Bash Gutierrez"
+    # chart json
+    global time_current; time_current = datetime.datetime.now().strftime("%m-%d-%Y %H:%M:%S")
+
+    ### SETUP VARIABLES ###
+    global context; context = "" # concatenates message history for re-insertion with every prompt
+    global messages; messages = [] # stores separate messages in list to be concatenated
+    global silence_count; silence_count = 0 # counts number of no prompt
+    global current_requests; current_requests = [] # stores recognized commands
+    global command_prompt; command_prompt = "\n\n----------------COMMANDS-------------------\n\nWhen "+patient+" has a request or need that falls strictly under the COMMANDS list below, you alert the care team by inserting the exact command and it's parameter/reason between brackets within a message.\n\n[PATIENT REQUESTS NURSE: PARAMETER REASON]\n[BED ASSIST: PARAMETER REASON]\n[BATHROOM ASSIST: PARAMETER REASON]\n[DRESS ASSIST: PARAMETER REASON]\n[PAIN REQUEST: PARAMETER REASON]\n[FOOD REQUEST: PARAMETER REASON]\n[FLUID REQUEST: PARAMETER REASON]\n\n[CHANGE ROOM TEMPERATURE: TEMPERATURE]\n[LIGHT: ON/OFF]\n[PRIVACY FILTER: ON/OFF]"
+    global chart; chart = str(get_chart())
+    
+    print("\nvia-bedside\n\npress the space key to continue...\n")
+    wait_for_key('space')
+
+    listen()
+    
+if __name__ == '__main__':
+    main()
