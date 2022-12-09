@@ -14,9 +14,11 @@
         },
 
         "LOCATION": {
+            "datetime current": "",
             "zone": "Tioga Pavilion (Zone A)",
             "floor": "3 West",
-            "room": "A-315"
+            "room": "A-315",
+            "room temperature": "73.4 F (Only patient/nurse adjustable through button on TV remote)"
         },
 
         "VITALS": {
@@ -45,7 +47,10 @@
         },
 
         "MEDICAL HISTORY": {
-            "conditions": ["Hypertension", "Asthma"],
+            "other conditions": [
+                "Hypertension",
+                "Asthma"
+            ],
             "surgeries": [
                 {
                 "date": "01-01-2010",
@@ -58,44 +63,48 @@
                 "surgeon": "Dr. Johnson"
                 }
                 ],
-            "allergies": ["Peanut", "Sulfa", "Penicillin"],
-            "active medications": [
+            "allergies": [
+                "Peanut",
+                "Sulfa",
+                "Penicillin"
+            ],
+            "other medications": [
                 {
                     "name": "Metoprolol",
                     "dose": "50 mg",
                     "frequency": "twice daily",
                     "route": "oral",
-                    "prescribing_doctor": "Dr. Smith",
-                    "dispensing_pharmacy": "Walgreens"
+                    "prescribing doctor": "Dr. Smith",
+                    "dispensing pharmacy": "Walgreens"
                 },
                 {
                     "name": "Albuterol",
                     "dose": "2.5 mg",
                     "frequency": "three times daily",
                     "route": "inhalation",
-                    "prescribing_doctor": "Dr. Smith",
-                    "dispensing_pharmacy": "Walgreens"
+                    "prescribing doctor": "Dr. Smith",
+                    "dispensing pharmacy": "Walgreens"
                 }
             ]
         },
             "immunizations": [
                 {
                     "date": "2018-01-01",
-                    "vaccine_name": "Influenza",
+                    "vaccine name": "Influenza",
                     "dose": "1",
                     "route": "intramuscular",
                     "site": "left arm"
                 },
                 {
                     "date": "2018-03-01",
-                    "vaccine_name": "Tetanus",
+                    "vaccine name": "Tetanus",
                     "dose": "1",
                     "route": "intramuscular",
                     "site": "right arm"
                 },
                 {
                     "date": "2018-05-01",
-                    "vaccine_name": "Pneumococcal",
+                    "vaccine name": "Pneumococcal",
                     "dose": "1",
                     "route": "intramuscular",
                     "site": "left thigh"
@@ -173,7 +182,7 @@
         "CARE PLAN": {
             "admission date": "11-22-22",
             "discharge date": "12-10-22",
-            "admission reason(s)": [
+            "admission reason/chief complaint": [
                 "Suspected pneumonia"
             ],
             "assessment": [
