@@ -32,14 +32,17 @@ speech_config.speech_synthesis_voice_name=tts_voice
 voice = speech_config.speech_synthesis_voice_name
 primary_language = speech_config.speech_recognition_language
 
+#language_config = speechsdk.AutoDetectSourceLanguageConfig(languages=["en-US","es-US"])
 stt_config = speechsdk.audio.AudioConfig(use_default_microphone=True) # microphone device stt # stream from here?
 tts_config = speechsdk.audio.AudioOutputConfig(use_default_speaker=True) # speaker device tts
 
-speech_recognizer = speechsdk.SpeechRecognizer(speech_config=speech_config, audio_config=stt_config, language=stt_language) # inits stt
+#speech_recognizer = speechsdk.SpeechRecognizer(speech_config=speech_config, audio_config=stt_config, auto_detect_source_language_config=language_config) # inits stt for auto multi detection languages
+speech_recognizer = speechsdk.SpeechRecognizer(speech_config=speech_config, audio_config=stt_config, language=stt_language) # inits stt for one detection language
+
 speech_synthesizer = speechsdk.SpeechSynthesizer(speech_config=speech_config, audio_config=tts_config) # inits tts
 
-style = "friendly" # ssml style for voice
-rate = "1.00" # speaking rate/speed
+style = "hopeful" # ssml style for voice
+rate = "1.10" # speaking rate/speed
 # sets up identifiers for conversation
 bot = "Iva"
 patient = "Bash Gutierrez"
@@ -52,7 +55,7 @@ context = "" # concatenates message history for re-insertion with every prompt
 messages = [] # stores separate messages in list to be concatenated
 silence_count = 0 # counts number of no prompt
 current_requests = [] # stores recognized commands
-command_prompt = "\n\n----------------COMMANDS-------------------\n\nFor each request that "+patient+" needs that falls under the COMMANDS list below, you alert the care team by inserting the exact command and it's details to replace between brackets within a message.\n\n[BED ASSIST: (DETAILS TO REPLACE)]\n[BATHROOM ASSIST: (DETAILS TO REPLACE)]\n[DRESS ASSIST: (DETAILS TO REPLACE)]\n[PAIN REQUEST: (DETAILS TO REPLACE)]\n[FOOD REQUEST: (DETAILS TO REPLACE)]\n[FLUID REQUEST: (DETAILS TO REPLACE)]\n[NURSE CALL: (DETAILS TO REPLACE)]\n\n[CHANGE ROOM TEMPERATURE: (TEMPERATURE)]\n[LIGHT: (ON/OFF)]\n[PRIVACY FILTER: (ON/OFF)]"
+command_prompt = "\n\n----------------COMMANDS-------------------\n\nWhen "+patient+" has a request or need that falls strictly under the COMMANDS list below, you alert the care team by inserting the exact command and it's parameter/reason between brackets within a message.\n\n[PATIENT REQUESTS NURSE: PARAMETER REASON]\n[BED ASSIST: PARAMETER REASON]\n[BATHROOM ASSIST: PARAMETER REASON]\n[DRESS ASSIST: PARAMETER REASON]\n[PAIN REQUEST: PARAMETER REASON]\n[FOOD REQUEST: PARAMETER REASON]\n[FLUID REQUEST: PARAMETER REASON]\n\n[CHANGE ROOM TEMPERATURE: TEMPERATURE]\n[LIGHT: ON/OFF]\n[PRIVACY FILTER: ON/OFF]"
 
 def get_chart():
     
@@ -97,7 +100,7 @@ def chat_gpt3(zice):
     #start_time = time.time()
     response = openai.Completion.create(
         engine="text-davinci-003",
-        prompt= "You are, "+bot+", a bedside medical assistant at Trinity University Hospital for a patient named "+patient+". Speak to "+patient+" only in "+primary_language+" colloquially with patience, compassion, empathy, and assurance. Keep the patient relaxed and informed. Explain things in understandable terms. For each request that "+patient+" needs that falls under the COMMANDS list below, you alert the care team by inserting the exact command and it's details to replace between brackets within a message.\n\n----------------MEDICAL CHART JSON-------------------\n\n"+chart+command_prompt+"\n\n----------------START OF CHAT-------------------\n\n"+context+"\n"+patient+": "+zice+"\n"+bot+":",
+        prompt= "You are, "+bot+", a bedside medical assistant at Trinity University Hospital for a patient named "+patient+". Speak to "+patient+" only in "+primary_language+" colloquially with patience, compassion, empathy, and assurance. Keep the patient relaxed and informed. Explain things in understandable terms. When "+patient+" has a request or need that strictly falls under the COMMANDS list below, you alert the care team by inserting the exact command and it's parameter/reason between brackets within a message.\n\n----------------MEDICAL CHART JSON-------------------\n\n"+chart+command_prompt+"\n\n----------------START OF CHAT-------------------\n\n"+context+"\n"+patient+": "+zice+"\n"+bot+":",
         #prompt= "You are, "+bot+", a clinical bedside intelligent virtual assistant (IVA) at Trinity University Hospital for a patient named "+patient+". Speak to "+patient+" only in "+language_primary+" with patience, empathy, and assurance. Keep the patient company and have conversations with them. Kindly instruct the patient to press their nurse call button on their TV remote when needed.\n\n"+chart+context+"\n"+patient+": "+zice+"\n"+bot+":",
         temperature=0.7,
         max_tokens=256,
@@ -154,7 +157,7 @@ def run_command():
     parameter = request_split[1].upper()
     
     match command:
-        case "NURSE CALL":
+        case "PATIENT REQUESTS NURSE":
             playsound('call.wav', False)
             print(f"\n[{time_current}] {command}: {parameter}\n")
         case "BED ASSIST":
@@ -186,12 +189,19 @@ def run_command():
                 case "YES":
                     playsound('call.wav', False)
                     print(f"\n[{time_current}] {command}: {parameter}\n")
+                case default:
+                    playsound('call.wav', False)
+                    print(f"\n[{time_current}] {command}: {parameter}\n")
+                    
         case "PRIVACY FILTER":
             match parameter:
                 case "NO":
                     playsound('call.wav', False)
                     print(f"\n[{time_current}] {command}: {parameter}\n")
                 case "YES":
+                    playsound('call.wav', False)
+                    print(f"\n[{time_current}] {command}: {parameter}\n")
+                case default:
                     playsound('call.wav', False)
                     print(f"\n[{time_current}] {command}: {parameter}\n")
         case default:

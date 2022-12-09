@@ -34,9 +34,9 @@ stt_language="en-US"
 # other than Aria, style compatible (-empathetic) with Davis, Guy, Jane, Jason, Jenny, Nancy, Tony
 
 # ENGLISH #
-#tts_voice='en-US-NancyNeural'
+tts_voice='en-US-NancyNeural'
 #tts_voice='en-US-JennyNeural'
-tts_voice='en-US-AriaNeural'
+#tts_voice='en-US-AriaNeural'
 #tts_voice='en-US-JennyMultilingualNeural'
 
 # SPANISH #
@@ -71,8 +71,15 @@ tts_voice='en-US-AriaNeural'
 # ITALIAN #
 #tts_voice='it-IT-ElsaNeural'
 
+# SPAIN #
+#tts_voice='es-ES-AbrilNeural'
+
+# INDIA #
+#tts_voice='hi-IN-SwaraNeural'
+
 # TAGALOG #
 #tts_voice='fil-PH-BlessicaNeural'
 
 # JAPANESE #
 #tts_voice='ja-JP-MayuNeural'
+#tts_voice='ja-JP-AoiNeural'
